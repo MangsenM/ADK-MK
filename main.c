@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 struct node{
     int max;
@@ -13,8 +14,8 @@ struct nodeStack{
     struct nodeStack* rest;
 };
 
-struct node currentroot = {-1, NULL, NULL};
-struct nodeStack stacktop = {NULL, NULL};
+struct node currentroot;
+struct nodeStack stacktop;
 
 
 char get_height(struct node root){
@@ -46,17 +47,17 @@ if (h == 0){
     return node;
 }
 if (i >> (h - 1 ) == 1){
-    struct node* lchild = NULL;
-    if(root.left_child != NULL){
-        lchild = root.left_child;
-    }
+    //struct node* lchild = NULL;
+    //if(root.left_child != NULL){
+    //    lchild = root.left_child;
+    //}
 
-    struct node rchild = {-1};
+    struct node rchild = {INT32_MIN};
     if (root.right_child != NULL){
         rchild = *root.right_child;
     }
 
-    struct node tree = {-1, lchild, construct_tree(rchild, i - (1 << (h - 1)), h - 1, val)};
+    struct node tree = {INT32_MIN, root.left_child, construct_tree(rchild, i - (1 << (h - 1)), h - 1, val)};
     struct node* branch = malloc(sizeof(struct node));
     *branch = tree;
    // if (branch != NULL){
@@ -70,17 +71,17 @@ if (i >> (h - 1 ) == 1){
    // printf("%d", p);
     return branch;
 } else {
-    struct node* rchild = NULL;
-    if(root.right_child != NULL){
-        rchild = root.right_child;
-    }
+    //struct node* rchild = NULL;
+    //if(root.right_child != NULL){
+    //    rchild = root.right_child;
+    //}
 
-    struct node lchild = {-1};
+    struct node lchild = {INT32_MIN};
     if (root.left_child != NULL){
         lchild = *root.left_child;
-    }
+    } 
 
-    struct node tree = {-1, construct_tree(lchild, i - (1 << (h - 1)), h - 1, val), rchild};
+    struct node tree = {INT32_MIN,construct_tree(lchild, i - (1 << (h - 1)), h - 1, val), root.right_child};
     struct node* branch = malloc(sizeof(struct node));
     *branch = tree;
    // if (branch != NULL){
