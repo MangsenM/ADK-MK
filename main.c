@@ -10,21 +10,24 @@ struct node{
     const struct node* right_child;
 };
 
-/**
+
 struct node_stack{
     struct node* head;
     struct node_stack* tail;
 };
-*/
+//set up root
+struct node nullnode;
+struct node* ROOT = &nullnode;
+struct node_stack* stack;
 
-struct node* currentroot;
-//struct node_stack stack;
-
+//height
+char h = 0;
 /**
   *@brief Calculates hight of tree*
   *
   *@param node Root node of tree.
   **/
+
 char get_height(const struct node* root){
     if((*root).left_child != NULL){
         return 1 + get_height((*root).left_child);
@@ -35,76 +38,36 @@ char get_height(const struct node* root){
     }
 }
 
-struct node* construct_tree(const struct node* root, u_int i, char h, int val){
-    if (h == 0){
+struct node* construct_tree(struct node* root, u_int i, char l, int val, struct node* t){
+    if(root == NULL){root = &nullnode;}
+
+    if (l == 0){
         struct node leaf = {val, NULL, NULL};
-        struct node* leafp = malloc(sizeof(struct node));
-        return memcpy(leafp, &leaf, sizeof(struct node));
+        return memcpy(&t[h - l], &leaf, sizeof(struct node));
     }
     
     struct node* rc;
     struct node* lc;
     int max;
 
-    if (i >> (h - 1 ) == 1){
+    if (i >> (l - 1 ) == 1){
       lc = (*root).left_child;
-      rc = construct_tree((*root).right_child, i - (1 << (h-1)), h-1, val);
+      rc = construct_tree((*root).right_child, i - (1 << (l-1)), l-1, val, t);
+      if (lc != NULL){
       max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
+      } else {max = (*rc).max;}
     }
     else {
-      lc = construct_tree((*root).left_child, i, h-1, val);
+      lc = construct_tree((*root).left_child, i, l-1, val, t);
       rc = (*root).right_child;
+      if (rc != NULL){
       max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
+      } else {max = (*lc).max;}
     }
 
     struct node newnode = {max, lc, rc};
- //   struct node* leafp = malloc(sizeof(struct node));
-    return memcpy((struct node*) malloc(sizeof(struct node)), &newnode, sizeof(struct node));
+    return memcpy(&t[h-l], &newnode, sizeof(struct node));
 }
-    
-/**
-        struct node rchild = {INT32_MIN};
-        if (root.right_child != NULL){rchild = *root.right_child;}
-
-        struct node tree = {INT32_MIN, root.left_child, construct_tree(rchild, i - (1 << (h - 1)), h - 1, val)};
-        
-        int maxval;
-        int rmax = (*tree.right_child).max; 
-
-        if(tree.left_child != NULL){
-        int lmax = (*tree.left_child).max;
-        maxval = (rmax > lmax ? rmax : lmax);
-        } else {maxval = rmax;}
-
-        tree.max = maxval;
-
-        struct node* branch = malloc(sizeof(struct node));
-        *branch = tree;
-        return branch;
-
-    } else {
-
-        struct node lchild = {INT32_MIN};
-        if (root.left_child != NULL){lchild = *root.left_child;} 
-
-        struct node tree = {INT32_MIN, construct_tree(lchild, i - (1 << (h - 1)), h - 1, val), root.right_child};
-
-        int maxval;
-        int lmax = (*tree.left_child).max; 
-
-        if(tree.right_child != NULL){
-        int rmax = (*tree.right_child).max;
-        maxval = (lmax > rmax ? lmax : rmax);
-        } else {maxval = lmax;}
-
-        tree.max = maxval;
-
-        struct node* branch = malloc(sizeof(struct node));
-        *branch = tree;
-        return branch;
-    }
-}
-*/
 
 char get_bits(u_int b){
     u_int val = b;
@@ -114,30 +77,44 @@ char get_bits(u_int b){
 }
 
 void set(struct node* root, u_int i, int val){
-    char h = get_height(root);
     char b = get_bits(i);
-    char new_height = h > b ? h:b;
-    currentroot = construct_tree(root, i, new_height, val); 
+    char l = h > b ? h:b;
+    h = l;
+
+    struct node_stack* newstack = malloc(sizeof(struct node_stack));
+    *newstack = (struct node_stack){ROOT, stack};
+    stack = newstack;
+
+    struct node* t = malloc(sizeof(struct node)*(l + 1));
+    construct_tree(root, i, l, val, t); 
+    ROOT = t;
 }
 
-int find(const struct node* root, u_int i, char h){
-    if (h == 0){
+int find(const struct node* root, u_int i, char l){
+    if (l == 0){
         return (*root).max;
     }
 
-    if ((i >> (h - 1 ) == 1) && ((*root).right_child != NULL)){
-        find((*root).right_child, i - (1 << (h - 1)), h - 1);
-    } else if ((i >> (h - 1 ) == 0) && ((*root).left_child != NULL)){
-        find((*root).left_child, i, h - 1);
-    } else {return 0;}
+    if ((i >> (l - 1) == 1) && ((*root).right_child != NULL)){
+        find((*root).right_child, i - (1 << (l - 1)), l - 1);
+    } else if ((i >> (l - 1 ) == 0) && ((*root).left_child != NULL)){
+        find((*root).left_child, i, l - 1);
+    } else {return -1;}
 }
 
 int get(struct node* root, u_int i){
-    char h = get_height(root);
     char b = get_bits(i);
     if (b > h){return 0;}
     
     return find(root, i, h);
+}
+
+void unset(){
+    if(stack == NULL){return;}
+    free(ROOT);
+    ROOT = (*stack).head;
+    stack = (*stack).tail;
+    h = get_height(ROOT);
 }
 
 void maxinterval(struct node a, u_int l_bound, u_int r_bound){
@@ -149,34 +126,57 @@ int main(){
     char p;
     int i;
 
-    printf("inserting %d at index %d \n", 100,4);
-    set(currentroot, 4, 100);
-    p = get_height(currentroot);
-    printf("current height is: %d\n", p);
-    rootmax = (*currentroot).max;
-    printf("max in Tree is: %d\n", rootmax);
-    i = get(currentroot, 4);
+    i = get(ROOT, 4);
     printf("current value at %d is: %d\n",4,i);
 
-    printf("inserting %d at index %d \n", 120,6);
-    set(currentroot, 6, 120);
-    p = get_height(currentroot);
-    printf("current height is: %d\n", p);
-    rootmax = (*currentroot).max;
+    printf("inserting %d at index %d \n", 100,4);
+    set(ROOT, 4, 100);
+    printf("current height is: %d\n", h);
+    rootmax = (*ROOT).max;
     printf("max in Tree is: %d\n", rootmax);
-    i = get(currentroot, 6);
-    printf("current value at %d is: %d\n",6,i);
+    char realh = get_height(ROOT);
+    printf("real height should be ; %d\n",realh);
+    i = get(ROOT, 4);
+    printf("current value at %d is: %d\n",4,i);
+
+    printf("inserting %d at index %d \n", 120,9);
+    set(ROOT, 9, 120);
+    printf("current height is: %d\n", h);
+    rootmax = (*ROOT).max;
+    printf("max in Tree is: %d\n", rootmax);
+    i = get(ROOT, 9);
+    printf("current value at %d is: %d\n",9,i);
 
     printf("inserting %d at index %d \n", 10,4);
-    set(currentroot, 4, 10);
-    p = get_height(currentroot);
-    printf("current height is: %d\n", p);
-    rootmax = (*currentroot).max;
+    set(ROOT, 4, 10);
+    printf("current height is: %d\n", h);
+    rootmax = (*ROOT).max;
     printf("max in Tree is: %d\n", rootmax);
-    i = get(currentroot, 4);
+    
+    printf("%d",h);
+    i = get(ROOT, 4);
     printf("current value at %d is: %d\n",4,i);
 
-    i = get(currentroot, 6);
-    printf("current value at %d is: %d\n",6,i);
+    printf("%d",h);
+    i = get(ROOT, 9);
+    printf("current value at %d is: %d\n",9,i);
+
+    unset();
+    printf("%d",h);
+    i = get(ROOT, 4);
+    printf("current value at %d is: %d\n",4,i);
+
+    printf("%d",h);
+    i = get(ROOT, 9);
+    printf("current value at %d is: %d\n",9,i);
+    
+    unset();
+    printf("%d",h);
+    i = get(ROOT, 4);
+    printf("current value at %d is: %d\n",4,i);
+
+    printf("%d",h);
+    i = get(ROOT, 9);
+    printf("current value at %d is: %d\n",9,i);
     return 0;
 }
