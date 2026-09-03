@@ -163,7 +163,8 @@ printf("b > h0\n");
 printf("root is not nullnode\n");
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
         struct node* lc = extend_tree(root, b - h0 - 1, &t[b+2]);
-        struct node* rc = replace_leaf(&nullnode, i, b-1, val, &t[1]);
+printf("extended hight: %d\n",get_height(lc));
+        struct node* rc = replace_leaf(&nullnode, i - (1 << (b-1)), b-1, val, &t[1]);
 
         int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
         struct node newroot = {max, lc, rc};
