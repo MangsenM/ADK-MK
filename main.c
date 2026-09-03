@@ -181,7 +181,7 @@ printf("ROOT set \n");
 
 printf("b <= h0\n");
     struct node* t = malloc(sizeof(struct node)*(h0 + 1));
-    ROOT = replace_leaf(root, i, h0+1, val, t); 
+    ROOT = replace_leaf(root, i, h0, val, t); 
     }
 }
 
