@@ -40,15 +40,15 @@ struct node_stack* stack;
   * @param node Root node of tree.
   */
 char get_height(const struct node* root){
-printf("get_height reached\n");
+//printf("get_height reached\n");
       if (root == NULL){printf("root is null"); return 0;}
-printf("get_height reached first if passed\n");
+//printf("get_height reached first if passed\n");
 
     if((*root).left_child != NULL){
-printf("get_height looking left\n");
+//printf("get_height looking left\n");
         return 1 + get_height((*root).left_child);
     } else if((*root).right_child != NULL){
-printf("get_height reached looking right\n");
+//printf("get_height reached looking right\n");
         return 1 + get_height((*root).right_child);
     } else {
         return 0;
@@ -94,17 +94,20 @@ printf("replace_leaf reached\n");
     if (l == 0){
 printf("rl basecase reached reached\n");
         struct node leaf = {val, NULL, NULL};
-        return memcpy(t, &leaf, sizeof(struct node));
+        memcpy(t, &leaf, sizeof(struct node));
+        printf("leaf value at set: %d\n",(*t).max);
+        return t;
     }
-    
+
     struct node* rc;
     struct node* lc;
     int max;
-    
+
     if (i >> (l - 1 ) == 1){
 printf("creating right path\n");
       lc = (*root).left_child;
       rc = replace_leaf((*root).right_child, i - (1 << (l-1)), l-1, val, &t[1]);
+printf("check child: %d\n", t[1].max);
       if (lc != NULL){
       max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
       } else {max = (*rc).max;}
@@ -113,12 +116,13 @@ printf("creating right path\n");
 printf("creating left path\n");
       lc = replace_leaf((*root).left_child, i, l-1, val, &t[1]);
       rc = (*root).right_child;
+printf("check child: %d\n", t[1].max);
       if (rc != NULL){
       max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
       } else {max = (*lc).max;}
     }
 
-printf("max is = \n", max);
+printf("max is = %d\n", t[1].max);
     struct node newnode = {max, lc, rc};
     return memcpy(t, &newnode, sizeof(struct node));
 }
@@ -159,24 +163,24 @@ printf("b > h0\n");
 printf("root is not nullnode\n");
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
         struct node* lc = extend_tree(root, b - h0 - 1, &t[b+2]);
-        struct node* rc = replace_leaf(&nullnode, i, b, val, &t[1]);
+        struct node* rc = replace_leaf(&nullnode, i, b-1, val, &t[1]);
 
         int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
         struct node newroot = {max, lc, rc};
         ROOT = memcpy(t, &newroot, sizeof(struct node));
-      } else {
+      } else { //edgecase for first set
 printf("root is nullnode\n");
         struct node* t = malloc(sizeof(struct node)*(b+1));
-        ROOT = replace_leaf(root, i, b, val,t);
+        ROOT = replace_leaf(root, i, b, val, t);
 printf("replace_leaf done \n");
-printf("rc max is = \n", (*(*ROOT).right_child).max);
+printf("rc max is = %d\n", (*(*ROOT).right_child).max);
 printf("ROOT set \n");
       }
     } else {
 
 printf("b <= h0\n");
     struct node* t = malloc(sizeof(struct node)*(h0 + 1));
-    ROOT = replace_leaf(root, i, h0, val, t); 
+    ROOT = replace_leaf(root, i, h0+1, val, t); 
     }
 }
 
@@ -197,7 +201,8 @@ printf("get reached\n");
     
     char h = get_height(root);
     char b = get_bits(i);
-    if (b > h){return 0;}
+    if (b > h)
+      return 0;
     
     return find(root, i, h);
 }
@@ -244,6 +249,7 @@ int main(){
     printf("max in Tree is: %d\n", rootmax);
     i = get(ROOT, 9);
     printf("current value at %d is: %d\n",9,i);
+    printf("sanity: %d\n", ROOT[4].max);
     i = get(ROOT, 4);
     printf("current value at %d is: %d\n",4,i);
 
