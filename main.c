@@ -36,9 +36,6 @@ struct node_stack{
     struct node_stack* tail;
 };
 
-// Settup of nullnode TODO:remove, create local and memcpy
-const struct node nullnode;
-
 /**
  * @brief Creates new dynamic array.
  */
@@ -112,6 +109,7 @@ struct node* extend_tree(const struct node* root, char l, struct node* t){
  */
 struct node* replace_leaf(const struct node* root, u_int i, char l, int val, struct node* t){
 printf("replace_leaf reached\n");
+    struct node nullnode = {(int)NULL,NULL,NULL}; //nullnode to avoid null pointer in input
     if(root == NULL)
         root = &nullnode;
 
@@ -174,9 +172,7 @@ void set(struct array* array, u_int i, int val){
 printf("reached set\n");
     char h0 = get_height(array->root);
     char b = get_bits(i);
-printf("test\n");
     struct node_stack* newstack = malloc(sizeof(struct node_stack));
-printf("test2\n");
     *newstack = (struct node_stack){array->root, array->history};
     array->history = newstack;
 
@@ -186,6 +182,7 @@ printf("b > h0\n");
 
       if((array->root->right_child != NULL) || (array->root->left_child != NULL)){ 
 printf("root is not nullnode\n");
+        struct node nullnode = {(int) NULL,NULL,NULL};
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
         struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+2]);
 printf("extended hight: %d\n",get_height(lc));
