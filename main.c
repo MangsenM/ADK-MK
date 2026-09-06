@@ -5,6 +5,14 @@
 #include <string.h>
 
 /**
+ * @brief Persistant array containing root node and history
+ */
+struct array{
+  struct node* root;
+  struct node_stack* history;
+};
+
+/**
  * @brief Persistant tree node
  *
  * Node stores the max subtree value (or value if leaf) as well
@@ -28,11 +36,27 @@ struct node_stack{
     struct node_stack* tail;
 };
 
-// Settup of nullnode to avoid NULL pointer error
-// Global root of tree and stack
+// Settup of nullnode TODO:remove, create local and memcpy
 const struct node nullnode;
-struct node* ROOT = &nullnode;
-struct node_stack* stack;
+
+/**
+ * @brief Creates new dynamic array.
+ */
+struct array* newarray(){
+  struct array* aptr = malloc(sizeof(struct array));
+  struct node* nptr = malloc(sizeof(struct node));
+  struct node_stack* sptr = malloc(sizeof(struct node_stack));
+
+  struct node nullnode;
+  memcpy(nptr, &nullnode, sizeof(struct node));
+
+  struct node_stack nullstack;
+  memcpy(sptr, &nullstack, sizeof(struct node_stack));
+
+  struct array nullarray = {nptr, sptr};
+
+  return memcpy(aptr, &nullarray, sizeof(struct array));
+}
 
 /**
   * @brief Calculates hight of tree.
@@ -44,12 +68,12 @@ char get_height(const struct node* root){
       if (root == NULL){printf("root is null"); return 0;}
 //printf("get_height reached first if passed\n");
 
-    if((*root).left_child != NULL){
+    if(root->left_child != NULL){
 //printf("get_height looking left\n");
-        return 1 + get_height((*root).left_child);
-    } else if((*root).right_child != NULL){
+        return 1 + get_height(root->left_child);
+    } else if(root->right_child != NULL){
 //printf("get_height reached looking right\n");
-        return 1 + get_height((*root).right_child);
+        return 1 + get_height(root->right_child);
     } else {
         return 0;
     }
@@ -69,7 +93,7 @@ struct node* extend_tree(const struct node* root, char l, struct node* t){
     //struct node* rc; //should be able to deleat this and just assign NULL
     struct node* lc = extend_tree(root, l - 1, &t[1]);
 
-    struct node newnode = {(*root).max, lc, NULL}; //TODO: Look at if able to do without copy
+    struct node newnode = {root->max, lc, NULL}; //TODO: Look at if able to do without copy
     return memcpy(t, &newnode, sizeof(struct node));
 }
 
@@ -105,8 +129,8 @@ printf("rl basecase reached reached\n");
 
     if (i >> (l - 1 ) == 1){
 printf("creating right path\n");
-      lc = (*root).left_child;
-      rc = replace_leaf((*root).right_child, i - (1 << (l-1)), l-1, val, &t[1]);
+      lc = root->left_child;
+      rc = replace_leaf(root->right_child, i - (1 << (l-1)), l-1, val, &t[1]);
 printf("check child: %d\n", t[1].max);
       if (lc != NULL){
       max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
@@ -114,8 +138,8 @@ printf("check child: %d\n", t[1].max);
     }
     else {
 printf("creating left path\n");
-      lc = replace_leaf((*root).left_child, i, l-1, val, &t[1]);
-      rc = (*root).right_child;
+      lc = replace_leaf(root->left_child, i, l-1, val, &t[1]);
+      rc = root->right_child;
 printf("check child: %d\n", t[1].max);
       if (rc != NULL){
       max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
@@ -146,42 +170,42 @@ char get_bits(u_int b){
  * @param i Index to insert value at.
  * @param val Value to insert.
  */
-void set(const struct node* root, u_int i, int val){
+void set(struct array* array, u_int i, int val){
 printf("reached set\n");
-    char h0 = get_height(root);
+    char h0 = get_height(array->root);
     char b = get_bits(i);
 
     struct node_stack* newstack = malloc(sizeof(struct node_stack));
-    *newstack = (struct node_stack){ROOT, stack};
-    stack = newstack;
+    *newstack = (struct node_stack){array->root, array->history};
+    array->history = newstack;
 
 printf("choosing path with i = %d , h0 = %d, b = %d \n", i,h0,b);
     if(b > h0){
 printf("b > h0\n");
 
-      if(root != &nullnode){ 
+      if(array->root != &nullnode){ 
 printf("root is not nullnode\n");
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
-        struct node* lc = extend_tree(root, b - h0 - 1, &t[b+2]);
+        struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+2]);
 printf("extended hight: %d\n",get_height(lc));
         struct node* rc = replace_leaf(&nullnode, i - (1 << (b-1)), b-1, val, &t[1]);
 
         int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
         struct node newroot = {max, lc, rc};
-        ROOT = memcpy(t, &newroot, sizeof(struct node));
+        array->root = memcpy(t, &newroot, sizeof(struct node));
       } else { //edgecase for first set
 printf("root is nullnode\n");
         struct node* t = malloc(sizeof(struct node)*(b+1));
-        ROOT = replace_leaf(root, i, b, val, t);
+        array->root = replace_leaf(array->root, i, b, val, t);
 printf("replace_leaf done \n");
-printf("rc max is = %d\n", (*(*ROOT).right_child).max);
+printf("rc max is = %d\n", (((array)->root->right_child)->max));
 printf("ROOT set \n");
       }
     } else {
 
 printf("b <= h0\n");
     struct node* t = malloc(sizeof(struct node)*(h0 + 1));
-    ROOT = replace_leaf(root, i, h0, val, t); 
+    array->root = replace_leaf(array->root, i, h0, val, t); 
     }
 }
 
@@ -197,22 +221,22 @@ int find(const struct node* root, u_int i, char l){
     } else {return 0;}
 }
 
-int get(const struct node* root, u_int i){
+int get(const struct array* array, u_int i){
 printf("get reached\n");
     
-    char h = get_height(root);
+    char h = get_height(array->root);
     char b = get_bits(i);
     if (b > h)
       return 0;
     
-    return find(root, i, h);
+    return find(array->root, i, h);
 }
 
-void unset(){
-    if(stack == NULL){return;}
-    free(ROOT);
-    ROOT = (*stack).head;
-    stack = (*stack).tail;
+void unset(struct array* array){
+    if(array->history == NULL){return;}
+    free(array->root);
+    array->root = (array->history)->head;
+    array->history = (array->history)->tail;
 }
 
 void maxinterval(struct node a, u_int l_bound, u_int r_bound){
@@ -220,99 +244,101 @@ void maxinterval(struct node a, u_int l_bound, u_int r_bound){
 
 int main(){
 
+    struct array* A = newarray();
+
     int rootmax;
     char p;
     int i;
     char h;
-    i = get(ROOT, 4);
+    i = get(A, 4);
     printf("current value at %d is: %d\n",4,i);
     printf("\n");
 
     printf("inserting %d at index %d \n", 100,4);
-    set(ROOT, 4, 100);
+    set(A, 4, 100);
     printf("set done \n");
-    h = get_height(ROOT);
+    h = get_height(A->root);
     printf("get_height done \n");
     printf("current height is: %d\n", h);
     printf("looking for rootmax \n");
-    rootmax = (*ROOT).max;
+    rootmax = (A->root)->max;
     printf("rootmax assigned\n");
     printf("max in Tree is: %d\n", rootmax);
-    i = get(ROOT, 4);
+    i = get(A, 4);
     printf("current value at %d is: %d\n",4,i);
 
     printf("\n");
     printf("inserting %d at index %d \n", 120,9);
-    set(ROOT, 9, 120);
-    h = get_height(ROOT);
+    set(A, 9, 120);
+    h = get_height(A->root);
     printf("current height is: %d\n", h);
-    rootmax = (*ROOT).max;
+    rootmax = (A->root)->max;
     printf("max in Tree is: %d\n", rootmax);
-    i = get(ROOT, 9);
+    i = get(A, 9);
     printf("current value at %d is: %d\n",9,i);
-    printf("sanity: %d\n", ROOT[4].max);
-    i = get(ROOT, 4);
+    printf("sanity: %d\n", ((A->root)[4]).max);
+    i = get(A, 4);
     printf("current value at %d is: %d\n",4,i);
 
     printf("\n");
     printf("inserting %d at index %d \n", 10,4);
-    set(ROOT, 4, 10);
-    h = get_height(ROOT);
+    set(A, 4, 10);
+    h = get_height(A->root);
     printf("current height is: %d\n", h);
-    rootmax = (*ROOT).max;
+    rootmax = (A->root)->max;
     printf("max in Tree is: %d\n", rootmax);
     
-    h = get_height(ROOT);
+    h = get_height(A->root);
     printf("height = %d\n",h);
-    i = get(ROOT, 4);
+    i = get(A, 4);
     printf("current value at %d is: %d\n",4,i);
 
     printf("\n");
-    h = get_height(ROOT);
+    h = get_height(A->root);
     printf("height = %d\n",h);
-    i = get(ROOT, 9);
+    i = get(A, 9);
     printf("current value at %d is: %d\n",9,i);
     
     printf("\n");
 printf("unset");
     printf("\n");
-    unset();
-    h = get_height(ROOT);
+    unset(A);
+    h = get_height(A->root);
     printf("height = %d\n",h);
-    i = get(ROOT, 4);
+    i = get(A, 4);
     printf("current value at %d is: %d\n",4,i);
 
-    h = get_height(ROOT);
+    h = get_height(A->root);
     printf("height = %d\n",h);
-    i = get(ROOT, 9);
+    i = get(A, 9);
     printf("current value at %d is: %d\n",9,i);
     
     printf("\n");
 printf("unset");
     printf("\n");
-    unset();
-    h = get_height(ROOT);
+    unset(A);
+    h = get_height(A->root);
     printf("height = %d\n",h);
-    i = get(ROOT, 4);
+    i = get(A, 4);
     printf("current value at %d is: %d\n",4,i);
 
-    h = get_height(ROOT);
+    h = get_height(A->root);
     printf("height = %d\n",h);
-    i = get(ROOT, 9);
+    i = get(A, 9);
     printf("current value at %d is: %d\n",9,i);
 
     printf("\n");
 printf("unset");
     printf("\n");
-    unset();
-    h = get_height(ROOT);
+    unset(A);
+    h = get_height(A->root);
     printf("height = %d\n",h);
-    i = get(ROOT, 4);
+    i = get(A, 4);
     printf("current value at %d is: %d\n",4,i);
 
-    h = get_height(ROOT);
+    h = get_height(A->root);
     printf("height = %d\n",h);
-    i = get(ROOT, 9);
+    i = get(A, 9);
     printf("current value at %d is: %d\n",9,i);
     return 0;
 }
