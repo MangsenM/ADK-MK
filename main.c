@@ -237,12 +237,112 @@ void unset(struct array* array){
     array->history = (array->history)->tail;
 }
 
-void maxinterval(struct node a, u_int l_bound, u_int r_bound){
+/**
+ * @brief Checks max interval for subtree only including lower bound.
+ *
+ * @param root Current node in searchpath.
+ * @param h Height remaining in tree.
+ * @param lbound Lower index bound (inclusive).
+ */
+int maxinterval_lowerbound(const struct node* root, char h, int lbound){
+  if(lbound >> h-1 == 0){
+    int lMAX = root->left_child != NULL ? root->left_child->max : -1;
+    int nodeMAX = root->max;
+
+    return lMAX <= nodeMAX ? nodeMAX : maxinterval_lowerbound(root->left_child,h-1,lbound);
+  }
+  else if (root->right_child != NULL)
+    return maxinterval_lowerbound(root->right_child, h-1, lbound-(1<<h-1));
+  else
+    return root->max;
+}
+
+/**
+ * @brief Checks max interval for subtree only including lower bound.
+ *
+ * @param root Current node in searchpath.
+ * @param h Height remaining in tree.
+ * @param lbound Lower index bound (inclusive).
+ */
+int maxinterval_upperbound(const struct node* root, char h, int ubound){
+  if(ubound >> h-1 == 1){
+    int rMAX = root->right_child != NULL ? root->right_child->max : -1;
+    int nodeMAX = root->max;
+
+    return rMAX <= nodeMAX ? nodeMAX : maxinterval_upperbound(root->right_child,h-1,ubound-(1<<(h-1)));
+  }
+  else if (root->left_child != NULL)
+    return maxinterval_upperbound(root->left_child, h-1, ubound);
+  else
+    return root->max;
+}
+
+/**
+ * @brief Checks how to split search path for maxinterval
+ *
+ * @param root Current node in searchpath.
+ * @param h Height remaining in tree.
+ * @param lbound Lower index bound (inclusive)
+ * @param ubound Upper index bound (inclusive)
+ */
+int maxinterval_decrese(const struct node* root, char h, int lbound, int ubound){
+  const struct node* lc = root->left_child;
+  const struct node* rc = root->right_child;
+
+  if (lc == NULL && rc == NULL)
+    return root->max;
+
+  if(lbound >> h-1 == ubound >> h-1){
+    if (lbound >> h-1 == 1 && rc != NULL)
+      return maxinterval_decrese(rc,h-1, lbound-(1<<h-1), ubound-(1<<h-1));
+    else if (lc != NULL)
+      return maxinterval_decrese(lc,h-1,lbound,ubound);
+    else
+      return -1;
+  } else {
+    int leftmax = lc != NULL ? maxinterval_lowerbound(lc, h-1, lbound) : -1;
+    int rightmax = rc != NULL ? maxinterval_upperbound(rc, h-1, ubound) : -1;
+    return leftmax > rightmax ? leftmax : rightmax;
+  }
+}
+
+/**
+ * @brief Gets max element between specified indexes (inclusive).
+ *
+ * @param array Array being serched
+ * @param lbound Lower index bound (inclusive)
+ * @param ubound Upper index bound (inclusive)
+ */
+int maxinterval(const struct array* array, int lbound, int ubound){
+    if (lbound > ubound)
+      return 0;
+
+    int max = maxinterval_decrese(array->root, get_height(array->root), lbound, ubound); 
+
+    if (max == -1) 
+      return 0;
+    else
+      return max;
 }
 
 int main(){
-
     struct array* A = newarray();
+
+    set(A, 4, 2);
+    set(A, 1, 10);
+    set(A, 2, 20);
+    set(A, 3, 1);
+    set(A, 4, 112);
+    set(A, 5, 200);
+    set(A, 6, 90);
+    set(A, 12, 90);
+
+    printf("%d \n", maxinterval(A,0,2));
+    printf("%d \n", maxinterval(A,2,2));
+    printf("%d \n", maxinterval(A,0,12));
+    printf("%d \n", maxinterval(A,6,14));
+    printf("%d \n", maxinterval(A,8,12));
+    printf("%d \n", maxinterval(A,0,2));
 
     int rootmax;
     char p;
@@ -339,4 +439,5 @@ printf("unset");
     i = get(A, 9);
     printf("current value at %d is: %d\n",9,i);
     return 0;
+//*/
 }
