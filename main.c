@@ -174,8 +174,9 @@ void set(struct array* array, u_int i, int val){
 printf("reached set\n");
     char h0 = get_height(array->root);
     char b = get_bits(i);
-
+printf("test\n");
     struct node_stack* newstack = malloc(sizeof(struct node_stack));
+printf("test2\n");
     *newstack = (struct node_stack){array->root, array->history};
     array->history = newstack;
 
@@ -183,7 +184,7 @@ printf("choosing path with i = %d , h0 = %d, b = %d \n", i,h0,b);
     if(b > h0){
 printf("b > h0\n");
 
-      if(array->root != &nullnode){ 
+      if((array->root->right_child != NULL) || (array->root->left_child != NULL)){ 
 printf("root is not nullnode\n");
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
         struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+2]);
