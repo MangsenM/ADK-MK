@@ -61,15 +61,13 @@ struct array* newarray(){
   * @param node Root node of tree.
   */
 char get_height(const struct node* root){
-//printf("get_height reached\n");
-      if (root == NULL){printf("root is null"); return 0;}
-//printf("get_height reached first if passed\n");
+    if (root == NULL){printf("root is null"); return 0;}
 
+
+    
     if(root->left_child != NULL){
-//printf("get_height looking left\n");
         return 1 + get_height(root->left_child);
     } else if(root->right_child != NULL){
-//printf("get_height reached looking right\n");
         return 1 + get_height(root->right_child);
     } else {
         return 0;
@@ -108,16 +106,13 @@ struct node* extend_tree(const struct node* root, char l, struct node* t){
  * with precalculated size for the entire new path to the leaf.
  */
 struct node* replace_leaf(const struct node* root, u_int i, char l, int val, struct node* t){
-printf("replace_leaf reached\n");
     struct node nullnode = {(int)NULL,NULL,NULL}; //nullnode to avoid null pointer in input
     if(root == NULL)
         root = &nullnode;
 
     if (l == 0){
-printf("rl basecase reached reached\n");
         struct node leaf = {val, NULL, NULL};
         memcpy(t, &leaf, sizeof(struct node));
-        printf("leaf value at set: %d\n",(*t).max);
         return t;
     }
 
@@ -126,25 +121,20 @@ printf("rl basecase reached reached\n");
     int max;
 
     if (i >> (l - 1 ) == 1){
-printf("creating right path\n");
       lc = root->left_child;
       rc = replace_leaf(root->right_child, i - (1 << (l-1)), l-1, val, &t[1]);
-printf("check child: %d\n", t[1].max);
       if (lc != NULL){
       max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
       } else {max = (*rc).max;}
     }
     else {
-printf("creating left path\n");
       lc = replace_leaf(root->left_child, i, l-1, val, &t[1]);
       rc = root->right_child;
-printf("check child: %d\n", t[1].max);
       if (rc != NULL){
       max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
       } else {max = (*lc).max;}
     }
 
-printf("max is = %d\n", t[1].max);
     struct node newnode = {max, lc, rc};
     return memcpy(t, &newnode, sizeof(struct node));
 }
@@ -169,39 +159,28 @@ char get_bits(u_int b){
  * @param val Value to insert.
  */
 void set(struct array* array, u_int i, int val){
-printf("reached set\n");
     char h0 = get_height(array->root);
     char b = get_bits(i);
     struct node_stack* newstack = malloc(sizeof(struct node_stack));
     *newstack = (struct node_stack){array->root, array->history};
     array->history = newstack;
 
-printf("choosing path with i = %d , h0 = %d, b = %d \n", i,h0,b);
     if(b > h0){
-printf("b > h0\n");
 
       if((array->root->right_child != NULL) || (array->root->left_child != NULL)){ 
-printf("root is not nullnode\n");
         struct node nullnode = {(int) NULL,NULL,NULL};
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
         struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+2]);
-printf("extended hight: %d\n",get_height(lc));
         struct node* rc = replace_leaf(&nullnode, i - (1 << (b-1)), b-1, val, &t[1]);
 
         int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
         struct node newroot = {max, lc, rc};
         array->root = memcpy(t, &newroot, sizeof(struct node));
       } else { //edgecase for first set
-printf("root is nullnode\n");
         struct node* t = malloc(sizeof(struct node)*(b+1));
         array->root = replace_leaf(array->root, i, b, val, t);
-printf("replace_leaf done \n");
-printf("rc max is = %d\n", (((array)->root->right_child)->max));
-printf("ROOT set \n");
       }
     } else {
-
-printf("b <= h0\n");
     struct node* t = malloc(sizeof(struct node)*(h0 + 1));
     array->root = replace_leaf(array->root, i, h0, val, t); 
     }
@@ -220,8 +199,6 @@ int find(const struct node* root, u_int i, char l){
 }
 
 int get(const struct array* array, u_int i){
-printf("get reached\n");
-    
     char h = get_height(array->root);
     char b = get_bits(i);
     if (b > h)
@@ -244,17 +221,36 @@ void unset(struct array* array){
  * @param h Height remaining in tree.
  * @param lbound Lower index bound (inclusive).
  */
-int maxinterval_lowerbound(const struct node* root, char h, int lbound){
-  if(lbound >> h-1 == 0){
-    int lMAX = root->left_child != NULL ? root->left_child->max : -1;
-    int nodeMAX = root->max;
+int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) {
 
-    return lMAX <= nodeMAX ? nodeMAX : maxinterval_lowerbound(root->left_child,h-1,lbound);
-  }
-  else if (root->right_child != NULL)
-    return maxinterval_lowerbound(root->right_child, h-1, lbound-(1<<h-1));
-  else
-    return root->max;
+    if (root->left_child == NULL && root->left_child == NULL) {
+        return root->max;
+    }
+
+    if (lbound >> (h - 1) == 0) {
+        printf("i 0 is actually zero\n");
+        if (root->left_child == NULL) { 
+            printf("lefchild is null\n");
+            return root->max;
+
+        } else if (root->left_child->max < root->max) {
+            printf("lefchild is smaller than root\n");
+            return root->max;
+
+        } else {
+            printf("correct path\n");
+
+            int32_t rcMAX = root->right_child != NULL ? root->right_child->max : -1;
+            int32_t ltMAX = maxinterval_lowerbound(root->left_child, h - 1, lbound);
+            return rcMAX > ltMAX ? rcMAX : ltMAX;
+            printf("rcMAX %d ltMAX %d\n", rcMAX, ltMAX);
+        }
+
+    } else if (root->right_child != NULL) {
+        printf("going right");
+        return maxinterval_lowerbound(root->left_child, h - 1, lbound - (1 << (h - 1)));
+
+    } else { return -1; }
 }
 
 /**
@@ -264,17 +260,31 @@ int maxinterval_lowerbound(const struct node* root, char h, int lbound){
  * @param h Height remaining in tree.
  * @param lbound Lower index bound (inclusive).
  */
-int maxinterval_upperbound(const struct node* root, char h, int ubound){
-  if(ubound >> h-1 == 1){
-    int rMAX = root->right_child != NULL ? root->right_child->max : -1;
-    int nodeMAX = root->max;
+int32_t maxinterval_upperbound(const struct node *root, char h, int32_t ubound) {
 
-    return rMAX <= nodeMAX ? nodeMAX : maxinterval_upperbound(root->right_child,h-1,ubound-(1<<(h-1)));
-  }
-  else if (root->left_child != NULL)
-    return maxinterval_upperbound(root->left_child, h-1, ubound);
-  else
-    return root->max;
+    if (root->left_child == NULL && root->left_child == NULL) {
+        return root->max;
+    }
+
+    if (ubound >> (h - 1) == 1) {
+        
+        if (root->right_child == NULL) { 
+            return root->max;
+
+        } else if (root->right_child->max < root->max) {
+            return root->max;
+
+        } else {
+
+            int32_t lcMAX = root->left_child != NULL ? root->left_child->max : -1;
+            int32_t rtMAX = maxinterval_upperbound(root->right_child, h - 1, ubound - (1 << (h - 1)));
+            return lcMAX > rtMAX ? lcMAX : rtMAX;
+        }
+
+    } else if (root->left_child != NULL) {
+        return maxinterval_upperbound(root->left_child, h - 1, ubound);
+
+    } else { return -1; }
 }
 
 /**
@@ -285,25 +295,32 @@ int maxinterval_upperbound(const struct node* root, char h, int ubound){
  * @param lbound Lower index bound (inclusive)
  * @param ubound Upper index bound (inclusive)
  */
-int maxinterval_decrese(const struct node* root, char h, int lbound, int ubound){
-  const struct node* lc = root->left_child;
-  const struct node* rc = root->right_child;
+int32_t maxinterval_decrese(const struct node *root, char h, int32_t lbound, int32_t ubound) {
+    const struct node *lc = root->left_child;
+    const struct node *rc = root->right_child;
 
-  if (lc == NULL && rc == NULL)
-    return root->max;
+    if (lc == NULL && rc == NULL) {
+        return root->max;
+    }
 
-  if(lbound >> h-1 == ubound >> h-1){
-    if (lbound >> h-1 == 1 && rc != NULL)
-      return maxinterval_decrese(rc,h-1, lbound-(1<<h-1), ubound-(1<<h-1));
-    else if (lc != NULL)
-      return maxinterval_decrese(lc,h-1,lbound,ubound);
-    else
-      return -1;
-  } else {
-    int leftmax = lc != NULL ? maxinterval_lowerbound(lc, h-1, lbound) : -1;
-    int rightmax = rc != NULL ? maxinterval_upperbound(rc, h-1, ubound) : -1;
-    return leftmax > rightmax ? leftmax : rightmax;
-  }
+    if (lbound >> (h - 1) == ubound >> (h - 1)) {
+    
+        if (lbound >> (h - 1) == 1 && rc != NULL){
+            return maxinterval_decrese(rc, h - 1, lbound - (1 << (h - 1)), ubound - (1 << (h - 1)));
+    
+        } else if (ubound >> (h - 1) == 0 && lc != NULL){
+            printf("entering left tree \n");
+            return maxinterval_decrese(lc, h - 1, lbound, ubound);
+    
+        } else { return -1; }
+
+    } else {
+            printf("correct split \n");
+        int32_t leftmax = lc != NULL ? maxinterval_lowerbound(lc, h - 1, lbound) : -1;
+        int32_t rightmax = rc != NULL ? maxinterval_upperbound(rc, h - 1, ubound - (1 << (h - 1))) : -1;
+     printf("lmax %d rmax %d\n", leftmax, rightmax);
+        return leftmax > rightmax ? leftmax : rightmax;
+    }
 }
 
 /**
@@ -313,19 +330,24 @@ int maxinterval_decrese(const struct node* root, char h, int lbound, int ubound)
  * @param lbound Lower index bound (inclusive)
  * @param ubound Upper index bound (inclusive)
  */
-int maxinterval(const struct array* array, int lbound, int ubound){
-    if (lbound > ubound)
-      return 0;
+int32_t maxinterval(const struct array *array, int32_t lbound, int32_t ubound) {
 
-    int max = maxinterval_decrese(array->root, get_height(array->root), lbound, ubound); 
+    if (lbound > ubound) { return 0; }
 
-    if (max == -1) 
-      return 0;
-    else
-      return max;
+    int32_t max = maxinterval_decrese(array->root, get_height(array->root), lbound, ubound);
+
+    return max == -1 ? 0 : max;
 }
 
 int main(){
+  struct array* A = newarray();
+
+  set(A, 4, 2);
+  printf("A[4] = %d should be 2\n",get(A, 4));
+  set(A, 8, 5);
+  printf("A[4] = %d should be 2\n",get(A, 4));
+  printf("A[8] = %d should be 5\n",get(A, 8));
+/*
     struct array* A = newarray();
 
     set(A, 4, 2);
@@ -439,5 +461,5 @@ printf("unset");
     i = get(A, 9);
     printf("current value at %d is: %d\n",9,i);
     return 0;
-//*/
+*/
 }
