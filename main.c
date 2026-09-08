@@ -247,7 +247,7 @@ int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) 
 
     if (lbound >> (h - 1) == 0) {
         if (root->left_child == NULL) { 
-            return -1;
+            return root->max;
 
         } else if (root->left_child->max < root->max) {
             return root->max;
@@ -278,9 +278,9 @@ int32_t maxinterval_upperbound(const struct node *root, char h, int32_t ubound) 
     }
 
     if (ubound >> (h - 1) == 1) {
-        
+
         if (root->right_child == NULL) { 
-            return -1;
+            return root->max;
 
         } else if (root->right_child->max < root->max) {
             return root->max;
