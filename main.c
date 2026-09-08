@@ -17,10 +17,9 @@ struct array{
  *
  * Node stores the max subtree value (or value if leaf) as well
  * as connections to right and left child, NULL pointer if no child
- *TODO remove const and change memcopy.
  */
 struct node{
-    int max;
+    int32_t max;
     const struct node* left_child;
     const struct node* right_child;
 };
@@ -110,7 +109,7 @@ const struct node* extend_tree(const struct node* root, char l, struct node* t){
  * at the root. Allocated space needs have been created as a block
  * with precalculated size for the entire new path to the leaf.
  */
-const struct node* replace_leaf(const struct node* root, int i, char l, int val, struct node* t){
+const struct node* replace_leaf(const struct node* root, int32_t i, char l, int32_t val, struct node* t){
     const struct node nullnode = {0,NULL,NULL}; //nullnode to avoid null pointer in input
 
     if(root == NULL)
@@ -124,7 +123,7 @@ const struct node* replace_leaf(const struct node* root, int i, char l, int val,
 
     const struct node* rc;
     const struct node* lc;
-    int max;
+    int32_t max;
 
     if (i >> (l - 1 ) == 1){
       lc = root->left_child;
@@ -151,8 +150,8 @@ const struct node* replace_leaf(const struct node* root, int i, char l, int val,
  *
  * @param b Number to calculate number of bits for.
  */
-char get_bits(int b){
-    int shift = 0;
+char get_bits(int32_t b){
+    int32_t shift = 0;
 
     while(b >= 1){
         b = b >> 1;
@@ -170,7 +169,7 @@ char get_bits(int b){
  * @param i Index to insert value at.
  * @param val Value to insert.
  */
-void set(struct array* array, int i, int val){
+void set(struct array* array, int32_t i, int32_t val){
     char h0 = get_height(array->root);
     char b = get_bits(i);
     struct node_stack* newstack = malloc(sizeof(struct node_stack));
@@ -188,7 +187,7 @@ void set(struct array* array, int i, int val){
         const struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+1]);
         const struct node* rc = replace_leaf(&nullnode, i - (1 << (b-1)), b-1, val, &t[1]);
 
-        int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
+        int32_t max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
         const struct node newroot = {max, lc, rc};
         array->root = memcpy(t, &newroot, sizeof(struct node));
       }
@@ -198,7 +197,7 @@ void set(struct array* array, int i, int val){
     }
 }
 
-int find(const struct node* root, int i, char l){
+int32_t find(const struct node* root, int32_t i, char l){
     if (l == 0){
         return (*root).max;
     }
@@ -210,7 +209,7 @@ int find(const struct node* root, int i, char l){
     } else {return 0;}
 }
 
-int get(const struct array* array, int i){
+int32_t get(const struct array* array, int32_t i){
     if(array->root->max == -1) { return 0; }
 
     char h = get_height(array->root);
