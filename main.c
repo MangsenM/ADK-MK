@@ -245,7 +245,7 @@ int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) 
 
     if (lbound >> (h - 1) == 0) {
         if (root->left_child == NULL) { 
-            return root->max;
+            return -1;
 
         } else if (root->left_child->max < root->max) {
             return root->max;
@@ -278,7 +278,7 @@ int32_t maxinterval_upperbound(const struct node *root, char h, int32_t ubound) 
     if (ubound >> (h - 1) == 1) {
         
         if (root->right_child == NULL) { 
-            return root->max;
+            return -1;
 
         } else if (root->right_child->max < root->max) {
             return root->max;
@@ -338,9 +338,16 @@ int32_t maxinterval_decrese(const struct node *root, char h, int32_t lbound, int
  */
 int32_t maxinterval(const struct array *array, int32_t lbound, int32_t ubound) {
 
-    if (lbound > ubound || lbound < 0) { return 0; }
+    int h = get_height(array->root);
+    int32_t max;
 
-    int32_t max = maxinterval_decrese(array->root, get_height(array->root), lbound, ubound);
+    if (lbound > ubound || lbound < 0 || get_bits(lbound) > h ) { return 0; }
+
+    if (get_bits(ubound) > h){
+      max = maxinterval_lowerbound(array->root, h, lbound);
+    }else {
+      max = maxinterval_decrese(array->root, h, lbound, ubound);
+    }
 
     return max == -1 ? 0 : max;
 }
