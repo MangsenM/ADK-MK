@@ -170,6 +170,8 @@ char get_bits(int32_t b){
  * @param val Value to insert.
  */
 void set(struct array* array, int32_t i, int32_t val){
+    if (val < 0) { return; }
+
     char h0 = get_height(array->root);
     char b = get_bits(i);
     struct node_stack* newstack = malloc(sizeof(struct node_stack));
@@ -366,7 +368,7 @@ int main(){
         int parts;
 
         if (fgets(buff, 50, stdin) != NULL){
-            parts = sscanf(buff, "%s%d%d", command, &arg1, &arg2);
+            parts = sscanf(buff, "%14s%d%d", command, &arg1, &arg2);
 
             if(strcmp(command, "set") == 0 && parts == 3){
 
