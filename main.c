@@ -8,7 +8,7 @@
  * @brief Persistant array containing root node and history
  */
 struct array{
-  struct node* root;
+  const struct node* root;
   struct node_stack* history;
 };
 
@@ -20,7 +20,7 @@ struct array{
  *TODO remove const and change memcopy.
  */
 struct node{
-    const int max;
+    int max;
     const struct node* left_child;
     const struct node* right_child;
 };
@@ -33,7 +33,7 @@ struct node{
  * recent at the top of the stack
  */
 struct node_stack{
-    struct node* head;
+    const struct node* head;
     struct node_stack* tail;
 };
 
@@ -45,15 +45,18 @@ struct array* newarray(){
   struct node* nptr = malloc(sizeof(struct node));
   struct node_stack* sptr = malloc(sizeof(struct node_stack));
 
-  struct node empty = {-1,NULL,NULL}; //NOTE: added assign to bot get garbge value
-  memcpy(nptr, &empty, sizeof(struct node));
+  const struct node empty = {-1,NULL,NULL}; //NOTE: added assign to bot get garbge value
+
+  *nptr = empty;
+  //memcpy(nptr, &empty, sizeof(struct node));
 
   struct node_stack nullstack = {NULL,NULL};
-  memcpy(sptr, &nullstack, sizeof(struct node_stack));
+  *sptr = nullstack;
 
-  struct array nullarray = {nptr, sptr};
+  struct array narray = {nptr, sptr};
+  *aptr = narray;
 
-  return memcpy(aptr, &nullarray, sizeof(struct array));
+  return aptr;
 }
 
 /**
@@ -87,11 +90,11 @@ const struct node* extend_tree(const struct node* root, char l, struct node* t){
     if (l == 0)
         return root;
 
-    //struct node* rc; //should be able to deleat this and just assign NULL
     const struct node* lc = extend_tree(root, l - 1, &t[1]);
 
     const struct node newnode = {root->max, lc, NULL};
-    return memcpy(t, &newnode, sizeof(struct node));
+    *t = newnode;
+    return t;
 }
 
 /**
@@ -107,13 +110,14 @@ const struct node* extend_tree(const struct node* root, char l, struct node* t){
  * at the root. Allocated space needs have been created as a block
  * with precalculated size for the entire new path to the leaf.
  */
-struct node* replace_leaf(const struct node* root, int i, char l, int val, struct node* t){
-    struct node nullnode = {0,NULL,NULL}; //nullnode to avoid null pointer in input
+const struct node* replace_leaf(const struct node* root, int i, char l, int val, struct node* t){
+    const struct node nullnode = {0,NULL,NULL}; //nullnode to avoid null pointer in input
+
     if(root == NULL)
         root = &nullnode;
 
     if (l == 0){
-        struct node leaf = {val, NULL, NULL};
+        const struct node leaf = {val, NULL, NULL};
         memcpy(t, &leaf, sizeof(struct node));
         return t;
     }
@@ -137,8 +141,9 @@ struct node* replace_leaf(const struct node* root, int i, char l, int val, struc
       } else {max = (*lc).max;}
     }
 
-    struct node newnode = {max, lc, rc};
-    return memcpy(t, &newnode, sizeof(struct node));
+    const struct node newnode = {max, lc, rc};
+    *t = newnode;
+    return t;
 }
 
 /**
@@ -177,13 +182,14 @@ void set(struct array* array, int i, int val){
         struct node* t = malloc(sizeof(struct node)*(b+1));
         array->root = replace_leaf(array->root, i, b, val, t);
       }else { 
-        struct node nullnode = {0,NULL,NULL};
+        const struct node nullnode = {0,NULL,NULL};
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
+        
         const struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+1]);
-        struct node* rc = replace_leaf(&nullnode, i - (1 << (b-1)), b-1, val, &t[1]);
+        const struct node* rc = replace_leaf(&nullnode, i - (1 << (b-1)), b-1, val, &t[1]);
 
         int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
-        struct node newroot = {max, lc, rc};
+        const struct node newroot = {max, lc, rc};
         array->root = memcpy(t, &newroot, sizeof(struct node));
       }
     }else {
@@ -216,7 +222,7 @@ int get(const struct array* array, int i){
 }
 
 void unset(struct array* array){
-    if(array->history == NULL) { return; }
+    if(array->history->head == NULL) { return; }
     free(array->root);
     array->root = (array->history)->head;
 
@@ -308,13 +314,13 @@ int32_t maxinterval_decrese(const struct node *root, char h, int32_t lbound, int
     }
 
     if (lbound >> (h - 1) == ubound >> (h - 1)) {
-    
+
         if (lbound >> (h - 1) == 1 && rc != NULL){
             return maxinterval_decrese(rc, h - 1, lbound - (1 << (h - 1)), ubound - (1 << (h - 1)));
-    
+
         } else if (ubound >> (h - 1) == 0 && lc != NULL){
             return maxinterval_decrese(lc, h - 1, lbound, ubound);
-    
+
         } else { return -1; }
 
     } else {
@@ -344,8 +350,9 @@ int main(){
 
     struct array* A = newarray();
 
+    int run = 1;
 
-    while(1){
+    while(run){
         char buff[50];
         char command[15];
         int arg1;
@@ -372,124 +379,8 @@ int main(){
 
                 printf("%d\n",maxinterval(A, arg1, arg2));
             }
-        }
+        }else{run = 0;}
     }
 
 return 0;
 }
-
-/*
-
-    set(A, 4, 2);
-    set(A, 1, 10);
-    set(A, 2, 20);
-    set(A, 3, 1);
-    set(A, 4, 112);
-    set(A, 5, 200);
-    set(A, 6, 90);
-    set(A, 12, 90);
-
-    printf("%d \n", maxinterval(A,0,2));
-    printf("%d \n", maxinterval(A,2,2));
-    printf("%d \n", maxinterval(A,0,12));
-    printf("%d \n", maxinterval(A,6,14));
-    printf("%d \n", maxinterval(A,8,12));
-    printf("%d \n", maxinterval(A,0,2));
-
-    int rootmax;
-    char p;
-    int i;
-    char h;
-    i = get(A, 4);
-    printf("current value at %d is: %d\n",4,i);
-    printf("\n");
-
-    printf("inserting %d at index %d \n", 100,4);
-    set(A, 4, 100);
-    printf("set done \n");
-    h = get_height(A->root);
-    printf("get_height done \n");
-    printf("current height is: %d\n", h);
-    printf("looking for rootmax \n");
-    rootmax = (A->root)->max;
-    printf("rootmax assigned\n");
-    printf("max in Tree is: %d\n", rootmax);
-    i = get(A, 4);
-    printf("current value at %d is: %d\n",4,i);
-
-    printf("\n");
-    printf("inserting %d at index %d \n", 120,9);
-    set(A, 9, 120);
-    h = get_height(A->root);
-    printf("current height is: %d\n", h);
-    rootmax = (A->root)->max;
-    printf("max in Tree is: %d\n", rootmax);
-    i = get(A, 9);
-    printf("current value at %d is: %d\n",9,i);
-    printf("sanity: %d\n", ((A->root)[4]).max);
-    i = get(A, 4);
-    printf("current value at %d is: %d\n",4,i);
-
-    printf("\n");
-    printf("inserting %d at index %d \n", 10,4);
-    set(A, 4, 10);
-    h = get_height(A->root);
-    printf("current height is: %d\n", h);
-    rootmax = (A->root)->max;
-    printf("max in Tree is: %d\n", rootmax);
-    
-    h = get_height(A->root);
-    printf("height = %d\n",h);
-    i = get(A, 4);
-    printf("current value at %d is: %d\n",4,i);
-
-    printf("\n");
-    h = get_height(A->root);
-    printf("height = %d\n",h);
-    i = get(A, 9);
-    printf("current value at %d is: %d\n",9,i);
-    
-    printf("\n");
-printf("unset");
-    printf("\n");
-    unset(A);
-    h = get_height(A->root);
-    printf("height = %d\n",h);
-    i = get(A, 4);
-    printf("current value at %d is: %d\n",4,i);
-
-    h = get_height(A->root);
-    printf("height = %d\n",h);
-    i = get(A, 9);
-    printf("current value at %d is: %d\n",9,i);
-    
-    printf("\n");
-printf("unset");
-    printf("\n");
-    unset(A);
-    h = get_height(A->root);
-    printf("height = %d\n",h);
-    i = get(A, 4);
-    printf("current value at %d is: %d\n",4,i);
-
-    h = get_height(A->root);
-    printf("height = %d\n",h);
-    i = get(A, 9);
-    printf("current value at %d is: %d\n",9,i);
-
-    printf("\n");
-printf("unset");
-    printf("\n");
-    unset(A);
-    h = get_height(A->root);
-    printf("height = %d\n",h);
-    i = get(A, 4);
-    printf("current value at %d is: %d\n",4,i);
-
-    h = get_height(A->root);
-    printf("height = %d\n",h);
-    i = get(A, 9);
-    printf("current value at %d is: %d\n",9,i);
-    return 0;
-}
-*/
