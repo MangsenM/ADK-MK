@@ -45,8 +45,8 @@ struct array* newarray(){
   struct node* nptr = malloc(sizeof(struct node));
   struct node_stack* sptr = malloc(sizeof(struct node_stack));
 
-  struct node nullnode = {0,NULL,NULL}; //NOTE: added assign to bot get garbge value
-  memcpy(nptr, &nullnode, sizeof(struct node));
+  struct node empty = {-1,NULL,NULL}; //NOTE: added assign to bot get garbge value
+  memcpy(nptr, &empty, sizeof(struct node));
 
   struct node_stack nullstack = {NULL,NULL};
   memcpy(sptr, &nullstack, sizeof(struct node_stack));
@@ -173,8 +173,10 @@ void set(struct array* array, int i, int val){
     array->history = newstack;
 
     if(b > h0){
-
-      if((array->root->right_child != NULL) || (array->root->left_child != NULL)){ 
+      if(array->root->max == -1){
+        struct node* t = malloc(sizeof(struct node)*(b+1));
+        array->root = replace_leaf(array->root, i, b, val, t);
+      }else { 
         struct node nullnode = {0,NULL,NULL};
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
         const struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+1]);
@@ -183,13 +185,10 @@ void set(struct array* array, int i, int val){
         int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
         struct node newroot = {max, lc, rc};
         array->root = memcpy(t, &newroot, sizeof(struct node));
-      } else { //edgecase for hight 0 TODO: fix does not keep value when 0 height
-        struct node* t = malloc(sizeof(struct node)*(b+1));
-        array->root = replace_leaf(array->root, i, b, val, t);
       }
-    } else {
-    struct node* t = malloc(sizeof(struct node)*(h0 + 1));
-    array->root = replace_leaf(array->root, i, h0, val, t); 
+    }else {
+      struct node* t = malloc(sizeof(struct node)*(h0 + 1));
+      array->root = replace_leaf(array->root, i, h0, val, t); 
     }
 }
 
@@ -206,6 +205,8 @@ int find(const struct node* root, int i, char l){
 }
 
 int get(const struct array* array, int i){
+    if(array->root->max == -1) { return 0; }
+
     char h = get_height(array->root);
     char b = get_bits(i);
     if (b > h)
@@ -367,14 +368,11 @@ int main(){
 
                 unset(A);
 
-            } else if(strcmp(command, "maxinterval") == 0 && parts == 3){
+            } else if(strcmp(command, "maxininterval") == 0 && parts == 3){
 
                 printf("%d\n",maxinterval(A, arg1, arg2));
-
             }
-
-        } else { printf("READ error\n"); }
-
+        }
     }
 
 return 0;
