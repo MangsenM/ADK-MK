@@ -90,7 +90,7 @@ const struct node* extend_tree(const struct node* root, char l, struct node* t){
     //struct node* rc; //should be able to deleat this and just assign NULL
     const struct node* lc = extend_tree(root, l - 1, &t[1]);
 
-    const struct node newnode = {root->max, lc, NULL}; //TODO: Look at if able to do without copy
+    const struct node newnode = {root->max, lc, NULL};
     return memcpy(t, &newnode, sizeof(struct node));
 }
 
@@ -175,15 +175,15 @@ void set(struct array* array, int i, int val){
     if(b > h0){
 
       if((array->root->right_child != NULL) || (array->root->left_child != NULL)){ 
-        struct node nullnode = {(int) NULL,NULL,NULL};
+        struct node nullnode = {0,NULL,NULL};
         struct node* t = malloc(sizeof(struct node)*(2*b - h0)); //new path: b+1 nodes, extention of old tree: b-h0-1
-        struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+2]);
+        const struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+1]);
         struct node* rc = replace_leaf(&nullnode, i - (1 << (b-1)), b-1, val, &t[1]);
 
         int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
         struct node newroot = {max, lc, rc};
         array->root = memcpy(t, &newroot, sizeof(struct node));
-      } else { //edgecase for first set
+      } else { //edgecase for hight 0 TODO: fix does not keep value when 0 height
         struct node* t = malloc(sizeof(struct node)*(b+1));
         array->root = replace_leaf(array->root, i, b, val, t);
       }
@@ -199,9 +199,9 @@ int find(const struct node* root, int i, char l){
     }
 
     if ((i >> (l - 1) == 1) && ((*root).right_child != NULL)){
-        find((*root).right_child, i - (1 << (l - 1)), l - 1);
+        return find((*root).right_child, i - (1 << (l - 1)), l - 1); //NOTE: Added return
     } else if ((i >> (l - 1 ) == 0) && ((*root).left_child != NULL)){
-        find((*root).left_child, i, l - 1);
+        return find((*root).left_child, i, l - 1);
     } else {return 0;}
 }
 
@@ -215,10 +215,13 @@ int get(const struct array* array, int i){
 }
 
 void unset(struct array* array){
-    if(array->history == NULL){return;}
+    if(array->history == NULL) { return; }
     free(array->root);
     array->root = (array->history)->head;
+
+    struct node_stack* temp = array->history; //NOTE: Frees stackhead on pop now
     array->history = (array->history)->tail;
+    free(temp);
 }
 
 /**
@@ -230,7 +233,7 @@ void unset(struct array* array){
  */
 int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) {
 
-    if (root->left_child == NULL && root->left_child == NULL) {
+    if (root->left_child == NULL && root->right_child == NULL) {
         return root->max;
     }
 
@@ -248,7 +251,7 @@ int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) 
         }
 
     } else if (root->right_child != NULL) {
-        return maxinterval_lowerbound(root->left_child, h - 1, lbound - (1 << (h - 1)));
+        return maxinterval_lowerbound(root->right_child, h - 1, lbound - (1 << (h - 1)));
 
     } else { return -1; }
 }
@@ -262,7 +265,7 @@ int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) 
  */
 int32_t maxinterval_upperbound(const struct node *root, char h, int32_t ubound) {
 
-    if (root->left_child == NULL && root->left_child == NULL) {
+    if (root->left_child == NULL && root->right_child == NULL) {
         return root->max;
     }
 
@@ -329,7 +332,7 @@ int32_t maxinterval_decrese(const struct node *root, char h, int32_t lbound, int
  */
 int32_t maxinterval(const struct array *array, int32_t lbound, int32_t ubound) {
 
-    if (lbound > ubound) { return 0; }
+    if (lbound > ubound || lbound < 0) { return 0; }
 
     int32_t max = maxinterval_decrese(array->root, get_height(array->root), lbound, ubound);
 
@@ -339,6 +342,45 @@ int32_t maxinterval(const struct array *array, int32_t lbound, int32_t ubound) {
 int main(){
 
     struct array* A = newarray();
+
+
+    while(1){
+        char buff[50];
+        char command[15];
+        int arg1;
+        int arg2;
+        int parts;
+
+        if (fgets(buff, 50, stdin) != NULL){
+            parts = sscanf(buff, "%s%d%d", command, &arg1, &arg2);
+
+            if(strcmp(command, "set") == 0 && parts == 3){
+
+                set(A, arg1, arg2);
+
+
+            } else if(strcmp(command, "get") == 0 && parts == 2){
+
+                printf("%d\n", get(A, arg1));
+
+            } else if(strcmp(command, "unset") == 0 && parts == 1){
+
+                unset(A);
+
+            } else if(strcmp(command, "maxinterval") == 0 && parts == 3){
+
+                printf("%d\n",maxinterval(A, arg1, arg2));
+
+            }
+
+        } else { printf("READ error\n"); }
+
+    }
+
+return 0;
+}
+
+/*
 
     set(A, 4, 2);
     set(A, 1, 10);
@@ -355,7 +397,7 @@ int main(){
     printf("%d \n", maxinterval(A,6,14));
     printf("%d \n", maxinterval(A,8,12));
     printf("%d \n", maxinterval(A,0,2));
-/*
+
     int rootmax;
     char p;
     int i;
@@ -451,5 +493,5 @@ printf("unset");
     i = get(A, 9);
     printf("current value at %d is: %d\n",9,i);
     return 0;
-*/
 }
+*/
