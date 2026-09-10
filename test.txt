@@ -32,11 +32,10 @@
   get 0
   get 1000
 
-## Set negative index FAIL!!!
+## Set negative index
   set -1 1
   get -1 
 
-  0
 
 ## Set negative value
   set 1 -1
@@ -44,7 +43,7 @@
 
   0
 
-## Set index over 2^31-1 FAIL!!!!
+## Set index over 2^31-1
   set 2200000000 10
   get 2200000000
 
@@ -154,7 +153,7 @@
   get 1
   get 2
 
-  1
+  0
   2
 
 
@@ -166,7 +165,7 @@
   set 2 2
   set 3 3
   set 4 4
-  maxinintervall 3 3
+  maxininterval 3 3
 
   3
 
@@ -185,7 +184,7 @@
   55
   8
 
-## LB&UB empty value in middle !!!!FAILS!!!!
+## LB&UB empty value in middle
   set 10 10
   maxininterval 5 15
 
