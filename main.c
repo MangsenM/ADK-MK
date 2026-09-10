@@ -19,7 +19,7 @@ struct array{
  * as connections to right and left child, NULL pointer if no child
  */
 struct node{
-    int32_t max;
+    int max;
     const struct node* left_child;
     const struct node* right_child;
 };
@@ -109,7 +109,7 @@ const struct node* extend_tree(const struct node* root, char l, struct node* t){
  * at the root. Allocated space needs have been created as a block
  * with precalculated size for the entire new path to the leaf.
  */
-const struct node* replace_leaf(const struct node* root, int32_t i, char l, int32_t val, struct node* t){
+const struct node* replace_leaf(const struct node* root, int i, char l, int val, struct node* t){
     const struct node nullnode = {0,NULL,NULL}; //nullnode to avoid null pointer in input
 
     if(root == NULL)
@@ -123,7 +123,7 @@ const struct node* replace_leaf(const struct node* root, int32_t i, char l, int3
 
     const struct node* rc;
     const struct node* lc;
-    int32_t max;
+    int max;
 
     if (i >> (l - 1 ) == 1){
       lc = root->left_child;
@@ -150,8 +150,8 @@ const struct node* replace_leaf(const struct node* root, int32_t i, char l, int3
  *
  * @param b Number to calculate number of bits for.
  */
-char get_bits(int32_t b){
-    int32_t shift = 0;
+char get_bits(int b){
+    int shift = 0;
 
     while(b >= 1){
         b = b >> 1;
@@ -169,8 +169,8 @@ char get_bits(int32_t b){
  * @param i Index to insert value at.
  * @param val Value to insert.
  */
-void set(struct array* array, int32_t i, int32_t val){
-    if (val < 0) { return; }
+void set(struct array* array, int i, int val){
+    if (val < 0 || i < 0) { return; }
 
     char h0 = get_height(array->root);
     char b = get_bits(i);
@@ -189,7 +189,7 @@ void set(struct array* array, int32_t i, int32_t val){
         const struct node* lc = extend_tree(array->root, b - h0 - 1, &t[b+1]);
         const struct node* rc = replace_leaf(&nullnode, i - (1 << (b-1)), b-1, val, &t[1]);
 
-        int32_t max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
+        int max = (*lc).max > (*rc).max ? (*lc).max : (*rc).max;
         const struct node newroot = {max, lc, rc};
         array->root = memcpy(t, &newroot, sizeof(struct node));
       }
@@ -199,7 +199,7 @@ void set(struct array* array, int32_t i, int32_t val){
     }
 }
 
-int32_t find(const struct node* root, int32_t i, char l){
+int find(const struct node* root, int i, char l){
     if (l == 0){
         return (*root).max;
     }
@@ -211,7 +211,9 @@ int32_t find(const struct node* root, int32_t i, char l){
     } else {return 0;}
 }
 
-int32_t get(const struct array* array, int32_t i){
+int get(const struct array* array, int i){
+    if (i < 0) { return 0; }
+
     if(array->root->max == -1) { return 0; }
 
     char h = get_height(array->root);
@@ -239,7 +241,7 @@ void unset(struct array* array){
  * @param h Height remaining in tree.
  * @param lbound Lower index bound (inclusive).
  */
-int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) {
+int maxinterval_lowerbound(const struct node *root, char h, int lbound) {
 
     if (root->left_child == NULL && root->right_child == NULL) {
         return root->max;
@@ -253,8 +255,8 @@ int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) 
             return root->max;
 
         } else {
-            int32_t rcMAX = root->right_child != NULL ? root->right_child->max : -1;
-            int32_t ltMAX = maxinterval_lowerbound(root->left_child, h - 1, lbound);
+            int rcMAX = root->right_child != NULL ? root->right_child->max : -1;
+            int ltMAX = maxinterval_lowerbound(root->left_child, h - 1, lbound);
             return rcMAX > ltMAX ? rcMAX : ltMAX;
         }
 
@@ -271,7 +273,7 @@ int32_t maxinterval_lowerbound(const struct node *root, char h, int32_t lbound) 
  * @param h Height remaining in tree.
  * @param lbound Lower index bound (inclusive).
  */
-int32_t maxinterval_upperbound(const struct node *root, char h, int32_t ubound) {
+int maxinterval_upperbound(const struct node *root, char h, int ubound) {
 
     if (root->left_child == NULL && root->right_child == NULL) {
         return root->max;
@@ -287,8 +289,8 @@ int32_t maxinterval_upperbound(const struct node *root, char h, int32_t ubound) 
 
         } else {
 
-            int32_t lcMAX = root->left_child != NULL ? root->left_child->max : -1;
-            int32_t rtMAX = maxinterval_upperbound(root->right_child, h - 1, ubound - (1 << (h - 1)));
+            int lcMAX = root->left_child != NULL ? root->left_child->max : -1;
+            int rtMAX = maxinterval_upperbound(root->right_child, h - 1, ubound - (1 << (h - 1)));
             return lcMAX > rtMAX ? lcMAX : rtMAX;
         }
 
@@ -306,7 +308,7 @@ int32_t maxinterval_upperbound(const struct node *root, char h, int32_t ubound) 
  * @param lbound Lower index bound (inclusive)
  * @param ubound Upper index bound (inclusive)
  */
-int32_t maxinterval_decrese(const struct node *root, char h, int32_t lbound, int32_t ubound) {
+int maxinterval_decrese(const struct node *root, char h, int lbound, int ubound) {
     const struct node *lc = root->left_child;
     const struct node *rc = root->right_child;
 
@@ -325,8 +327,8 @@ int32_t maxinterval_decrese(const struct node *root, char h, int32_t lbound, int
         } else { return -1; }
 
     } else {
-        int32_t leftmax = lc != NULL ? maxinterval_lowerbound(lc, h - 1, lbound) : -1;
-        int32_t rightmax = rc != NULL ? maxinterval_upperbound(rc, h - 1, ubound - (1 << (h - 1))) : -1;
+        int leftmax = lc != NULL ? maxinterval_lowerbound(lc, h - 1, lbound) : -1;
+        int rightmax = rc != NULL ? maxinterval_upperbound(rc, h - 1, ubound - (1 << (h - 1))) : -1;
         return leftmax > rightmax ? leftmax : rightmax;
     }
 }
@@ -338,10 +340,10 @@ int32_t maxinterval_decrese(const struct node *root, char h, int32_t lbound, int
  * @param lbound Lower index bound (inclusive)
  * @param ubound Upper index bound (inclusive)
  */
-int32_t maxinterval(const struct array *array, int32_t lbound, int32_t ubound) {
+int maxinterval(const struct array *array, int lbound, int ubound) {
 
     int h = get_height(array->root);
-    int32_t max;
+    int max;
 
     if (lbound > ubound || lbound < 0 || get_bits(lbound) > h ) { return 0; }
 
@@ -363,29 +365,39 @@ int main(){
     while(run){
         char buff[50];
         char command[15];
+        long nr1;
+        long nr2;
         int arg1;
         int arg2;
         int parts;
 
         if (fgets(buff, 50, stdin) != NULL){
-            parts = sscanf(buff, "%14s%d%d", command, &arg1, &arg2);
+            parts = sscanf(buff, "%14s%ld%ld", command, &nr1, &nr2);
 
-            if(strcmp(command, "set") == 0 && parts == 3){
+            if((nr1 >> 32) > 0 || (nr2 >> 32) > 0){
+                nr1 = 0;
+                nr2 = 0;
+            }else{
+                arg1 = (int) nr1;
+                arg2 = (int) nr2;
 
-                set(A, arg1, arg2);
+                if(strcmp(command, "set") == 0 && parts == 3){
+
+                    set(A, arg1, arg2);
 
 
-            } else if(strcmp(command, "get") == 0 && parts == 2){
+                } else if(strcmp(command, "get") == 0 && parts == 2){
 
-                printf("%d\n", get(A, arg1));
+                    printf("%d\n", get(A, arg1));
 
-            } else if(strcmp(command, "unset") == 0 && parts == 1){
+                } else if(strcmp(command, "unset") == 0 && parts == 1){
 
-                unset(A);
+                    unset(A);
 
-            } else if(strcmp(command, "maxininterval") == 0 && parts == 3){
+                } else if(strcmp(command, "maxininterval") == 0 && parts == 3){
 
-                printf("%d\n",maxinterval(A, arg1, arg2));
+                    printf("%d\n",maxinterval(A, arg1, arg2));
+                }
             }
         }else{run = 0;}
     }
