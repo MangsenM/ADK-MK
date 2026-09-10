@@ -374,7 +374,7 @@ int main(){
         if (fgets(buff, 50, stdin) != NULL){
             parts = sscanf(buff, "%14s%ld%ld", command, &nr1, &nr2);
 
-            if((nr1 >> 32) > 0 || (nr2 >> 32) > 0){
+            if((nr1 >> 31) != 0 || (nr2 >> 31) != 0 ){
                 nr1 = 0;
                 nr2 = 0;
             }else{
