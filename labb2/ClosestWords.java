@@ -9,29 +9,54 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-  int partDist(String w1, String w2, int w1len, int w2len) {
-    if (w1len == 0)
-      return w2len;
-    if (w2len == 0)
-      return w1len;
-    int res = partDist(w1, w2, w1len - 1, w2len - 1) + 
-	(w1.charAt(w1len - 1) == w2.charAt(w2len - 1) ? 0 : 1);
-    int addLetter = partDist(w1, w2, w1len - 1, w2len) + 1;
-    if (addLetter < res)
-      res = addLetter;
-    int deleteLetter = partDist(w1, w2, w1len, w2len - 1) + 1;
-    if (deleteLetter < res)
-      res = deleteLetter;
-    return res;
+  int partDist(String w1, String w2, int w1len, int w2len, List<int[]> distanceMatrix) {
+    // i is collumn
+    for(int i = distanceMatrix.size() ; i <= w2len ; i++) {
+      int[] prevColl = distanceMatrix.getLast();
+      distanceMatrix.addLast(new int[w1len+1]);
+      distanceMatrix.getLast()[0] = i;
+
+      // j is row
+      for(int j = 1 ; j <= w1len ; j++) {
+        if(w1.charAt(j-1) == w2.charAt(i-1))
+          distanceMatrix.getLast()[j]=Math.min(distanceMatrix.getLast()[j-1]+1, Math.min(prevColl[j]+1,prevColl[j-1]));
+        else
+          distanceMatrix.getLast()[j]=Math.min(distanceMatrix.getLast()[j-1]+1, Math.min(prevColl[j]+1,prevColl[j-1]+1));
+      }
+    }
+    return distanceMatrix.getLast()[w1len];
   }
 
-  int distance(String w1, String w2) {
-    return partDist(w1, w2, w1.length(), w2.length());
+  int distance(String w1, String w2, List<int[]> distanceMatrix) {
+    return partDist(w1, w2, w1.length(), w2.length(), distanceMatrix);
   }
 
   public ClosestWords(String w, List<String> wordList) {
+    int w1len = w.length();
+
+    List<int[]> distanceMatrix = new LinkedList<int[]>();
+    distanceMatrix.addLast(new int[w1len+1]);
+
+    for(int i = 0 ; i <= w1len ; i++) {
+      distanceMatrix.getFirst()[i] = i;
+    }
+
+    String lastWord = "";
+    int matchingPrefix = 0;
+
     for (String s : wordList) {
-      int dist = distance(w, s);
+      matchingPrefix = 0;
+      int minLength = Math.min(lastWord.length(),s.length());
+      for(int i = 0; i < minLength; i++){
+        if(s.charAt(i) != lastWord.charAt(i)){
+          matchingPrefix = i;
+          break;
+        }
+      }
+
+      distanceMatrix = distanceMatrix.subList(0, matchingPrefix+1);
+
+      int dist = distance(w, s, distanceMatrix);
       // System.out.println("d(" + w + "," + s + ")=" + dist);
       if (dist < closestDistance || closestDistance == -1) {
         closestDistance = dist;
@@ -40,6 +65,7 @@ public class ClosestWords {
       }
       else if (dist == closestDistance)
         closestWords.add(s);
+      lastWord = s;
     }
   }
 
