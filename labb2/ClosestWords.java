@@ -10,19 +10,23 @@ public class ClosestWords {
   int closestDistance = -1;
 
   int partDist(String w1, String w2, int w1len, int w2len, List<int[]> distanceMatrix) {
-    // i is collumn
+      int[] prevRow = distanceMatrix.getLast();
+      
+    // i is row
     for(int i = distanceMatrix.size() ; i <= w2len ; i++) {
-      int[] prevColl = distanceMatrix.getLast();
-      distanceMatrix.addLast(new int[w1len+1]);
-      distanceMatrix.getLast()[0] = i;
+      int[] newRow = new int[w1len + 1];
+      newRow[0] = i;
 
-      // j is row
+      // j is col
       for(int j = 1 ; j <= w1len ; j++) {
         if(w1.charAt(j-1) == w2.charAt(i-1))
-          distanceMatrix.getLast()[j]=Math.min(distanceMatrix.getLast()[j-1]+1, Math.min(prevColl[j]+1,prevColl[j-1]));
+          newRow[j]=Math.min(newRow[j-1]+1, Math.min(prevRow[j]+1,prevRow[j-1]));
         else
-          distanceMatrix.getLast()[j]=Math.min(distanceMatrix.getLast()[j-1]+1, Math.min(prevColl[j]+1,prevColl[j-1]+1));
+          newRow[j]=Math.min(newRow[j-1]+1, Math.min(prevRow[j]+1,prevRow[j-1]+1));
       }
+      prevRow = newRow;
+      distanceMatrix.addLast(newRow);
+
     }
     return distanceMatrix.getLast()[w1len];
   }
@@ -32,21 +36,23 @@ public class ClosestWords {
   }
 
   public ClosestWords(String w, List<String> wordList) {
-    int w1len = w.length();
+    int wlen = w.length();
 
     List<int[]> distanceMatrix = new LinkedList<int[]>();
-    distanceMatrix.addLast(new int[w1len+1]);
+    int[] row1 = new int[wlen + 1];
 
-    for(int i = 0 ; i <= w1len ; i++) {
-      distanceMatrix.getFirst()[i] = i;
+    for(int i = 0 ; i <= wlen ; i++) {
+      row1[i] = i;
     }
+
+    distanceMatrix.add(row1);
 
     String lastWord = "";
     int matchingPrefix = 0;
 
     for (String s : wordList) {
       matchingPrefix = 0;
-      int minLength = Math.min(lastWord.length(),s.length());
+      int minLength = Math.min(lastWord.length(), s.length());
       for(int i = 0; i < minLength; i++){
         if(s.charAt(i) != lastWord.charAt(i)){
           matchingPrefix = i;
