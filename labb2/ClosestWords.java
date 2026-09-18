@@ -38,7 +38,7 @@ public class ClosestWords {
   public ClosestWords(String w, List<String> wordList) {
     int wlen = w.length();
 
-    List<int[]> distanceMatrix = new LinkedList<int[]>();
+    LinkedList<int[]> distanceMatrix = new LinkedList<int[]>();
     int[] row1 = new int[wlen + 1];
 
     for(int i = 0 ; i <= wlen ; i++) {
@@ -51,8 +51,9 @@ public class ClosestWords {
     int matchingPrefix = 0;
 
     for (String s : wordList) {
-      matchingPrefix = 0;
+
       int minLength = Math.min(lastWord.length(), s.length());
+
       for(int i = 0; i < minLength; i++){
         if(s.charAt(i) != lastWord.charAt(i)){
           matchingPrefix = i;
@@ -60,7 +61,14 @@ public class ClosestWords {
         }
       }
 
-      distanceMatrix = distanceMatrix.subList(0, matchingPrefix+1);
+       
+      LinkedList<int[]> newDistanceMatrix = new LinkedList<int[]>();
+      
+      for (int i = 0; i <= matchingPrefix; i++){
+            newDistanceMatrix.add(distanceMatrix.poll());
+      }
+
+      distanceMatrix = newDistanceMatrix; 
 
       int dist = distance(w, s, distanceMatrix);
       // System.out.println("d(" + w + "," + s + ")=" + dist);
