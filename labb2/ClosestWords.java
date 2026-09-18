@@ -2,36 +2,31 @@
 /* Se labbinstruktionerna i kursrummet i Canvas                  */
 /* Ursprunglig författare: Viggo Kann KTH viggo@kth.se           */
 import java.util.LinkedList;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ClosestWords {
   LinkedList<String> closestWords = null;
 
-  List<int[]> distanceMatrix;
+  int[][] dMat = new int[50][50];
 
   int closestDistance = -1;
 
   int partDist(String w1, String w2, int w1len, int w2len, int start) {
-      int[] prevRow = distanceMatrix.get(start);
       
     // i is row
-    for(int i = start + 1 ; i <= w2len ; i++) {
-      int[] newRow = new int[w1len + 1];
-      newRow[0] = i;
+    for(int i = start ; i <= w2len ; i++) {
+      dMat[i][0] = i;
 
       // j is col
       for(int j = 1 ; j <= w1len ; j++) {
         if(w1.charAt(j-1) == w2.charAt(i-1))
-          newRow[j]=Math.min(newRow[j-1]+1, Math.min(prevRow[j]+1,prevRow[j-1]));
+          dMat[i][j]=Math.min(dMat[i][j-1]+1, Math.min(dMat[i - 1][j]+1,dMat[i - 1][j-1]));
         else
-          newRow[j]=Math.min(newRow[j-1]+1, Math.min(prevRow[j]+1,prevRow[j-1]+1));
+          dMat[i][j]=Math.min(dMat[i][j-1]+1, Math.min(dMat[i - 1][j]+1,dMat[i - 1][j-1]+1));
       }
-      prevRow = newRow;
-      distanceMatrix.set(i,newRow);
 
     }
-    return distanceMatrix.get(w2len)[w1len];
+    return dMat[w2len][w1len];
   }
 
   int distance(String w1, String w2, int start) {
@@ -39,37 +34,24 @@ public class ClosestWords {
   }
 
   public ClosestWords(String w, List<String> wordList) {
-    distanceMatrix = new ArrayList<int[]>();
 
-    int wlen = w.length();
 
-    int[] row1 = new int[wlen + 1];
-
-    for(int i = 0 ; i <= wlen ; i++) {
-      row1[i] = i;
+    for(int i = 0 ; i < 50 ; i++) {
+      dMat[0][i] = i;
     }
 
-    distanceMatrix.addFirst(row1);
 
     String lastWord = "";
-    int matchingPrefix = 0;
+    int matchingPrefix = 1;
 
     for (String s : wordList) {
       
-      int rowsToAdd = s.length() - distanceMatrix.size() + 1;
-      while (rowsToAdd > 0){
-        int[] row = new int[wlen + 1];
-        distanceMatrix.add(row);
-        rowsToAdd--;
-      }
-
       int minLength = Math.min(lastWord.length(), s.length());
 
       for(int i = 0; i < minLength; i++){
-        if(s.charAt(i) != lastWord.charAt(i)){
-          matchingPrefix = i;
-          break;
-        }
+        if(s.charAt(i) == lastWord.charAt(i)){
+          matchingPrefix++;
+        } else { break; }
       }
 
        
@@ -84,6 +66,7 @@ public class ClosestWords {
       else if (dist == closestDistance)
         closestWords.add(s);
       lastWord = s;
+      matchingPrefix = 1;
     }
   }
 
