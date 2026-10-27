@@ -68,12 +68,26 @@ struct bi_graph* readMaxFlowSolution() {
   // skickade iväg)
   scanf("%d%d%d%d%d", &v, &s, &t, &f, &e);
 
-  struct bi_graph* fgraph = init_bi_graph(x,y,e);
+  struct bi_graph* fgraph = init_bi_graph(v-2,0,e-s-1);
 
+  int counter = 0;
+
+  struct neighbor_list* edges = (fgraph->neighbors);
+  struct neighbor_list* invedges = (fgraph->neighbors)+e;
   for (int i = 0; i < e; ++i) {
     int u, v, f;
-    // Flöde f från u till v
     scanf("%d%d%d", &u, &v, &f);
+    if (u == s){
+      counter++;
+    } else if (v != t) {
+      init_add_edge_c(fgraph,edges,invedges,u,v,f);
+      edges++;
+      invedges++;
+    }
+    
+    fgraph->y = fgraph->x - counter;
+    fgraph->x = counter;
+    // Flöde f från u till v
   }
 }
 
@@ -101,7 +115,7 @@ int main(void) {
 
   struct bi_graph* flowgraph = readMaxFlowSolution();
 
-  writeBipMatchSolution();
+  writeBipMatchSolution(flowgraph);
   // debugutskrift
   //fprintf(stderr, "Bipred avslutar\n");
   return 0;

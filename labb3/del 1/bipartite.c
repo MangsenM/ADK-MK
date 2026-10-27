@@ -26,6 +26,10 @@ struct bi_graph* init_bi_graph(int x, int y, int e){
  *  Adds edges during initilization, edge is added as neighbor (x to y) and inverse (y to x)
  */
 void init_add_edge(struct bi_graph* graph, struct neighbor_list* edges, struct neighbor_list* invedges, int from, int to){
+    int_add_edge_c(graph,edges,invedges,from,to,-1);
+}
+
+void init_add_edge_c(struct bi_graph* graph, struct neighbor_list* edges, struct neighbor_list* invedges, int from, int to, int capasity){
     struct neighbor_list** neighbors_from = (graph->neighbor_table)+from-1;
     struct neighbor_list** neighbors_to = (graph->neighbor_table)+to-1;
    
@@ -42,12 +46,14 @@ void init_add_edge(struct bi_graph* graph, struct neighbor_list* edges, struct n
         return;
     }
     //update head of neighborlist with updated previous for last head
-    *edges = (struct neighbor_list) {to,1, invedges, *neighbors_from};
+    *edges = (struct neighbor_list) {to,capasity, invedges, *neighbors_from};
     (graph->neighbor_table)[from - 1] = edges;
 
-    *invedges = (struct neighbor_list) {from,-1,edges,*neighbors_to};
+    *invedges = (struct neighbor_list) {from,0,edges,*neighbors_to};
     (graph->neighbor_table)[to - 1] = invedges;
 };
+
+
 
 void destroy_graph(struct bi_graph* graph){
     free(graph->neighbor_table);
