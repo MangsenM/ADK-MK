@@ -4,6 +4,7 @@
  * @author Karmela Eliasson and Malcolm Mangsén
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "graphutil.h"
 
@@ -13,7 +14,7 @@
  */
 struct bi_graph* init_bi_graph(int x, int y, int e){
     struct bi_graph* graph = malloc(sizeof(struct bi_graph));
-    struct neighbor_list** neighbor_table = calloc(x + y, sizeof(struct neighbor_list**));
+    struct neighbor_list** neighbor_table = calloc(x + y, sizeof(struct neighbor_list*));
     struct neighbor_list* neighbor_list = calloc(2*e, sizeof(struct neighbor_list));
 
     *graph = (struct bi_graph) {x, y, e, neighbor_table, neighbor_list};
@@ -28,22 +29,31 @@ void init_add_edge(struct bi_graph* graph, struct neighbor_list* edges, struct n
     struct neighbor_list** neighbors_from = (graph->neighbor_table)+from-1;
     struct neighbor_list** neighbors_to = (graph->neighbor_table)+to-1;
    
-    if ((*neighbors_from)->neighbor == 0){
+    printf("if statement next\n");
+    if ((*neighbors_from) == NULL){
     
+        printf("in if setting values for edges\n");
         *edges = (struct neighbor_list) {to,1, invedges, NULL};
-        *neighbors_from = edges;
+        (graph->neighbor_table)[from - 1] = edges;
+
+        printf("in if setting values for invedges\n");
 
         *invedges = (struct neighbor_list) {from,-1,edges, NULL};
-        *neighbors_to = invedges;
+        printf("trying to sev invtable \n");
+        (graph->neighbor_table)[to - 1] = invedges;
+
+        printf("return from if next\n");
 
         return;
     }
     //update head of neighborlist with updated previous for last head
+    printf("after if setting values for edges\n");
     *edges = (struct neighbor_list) {to,1, invedges, *neighbors_from};
-    *neighbors_from = edges;
+    (graph->neighbor_table)[from - 1] = edges;
 
+    printf("after if setting values for invedges\n");
     *invedges = (struct neighbor_list) {from,-1,edges,*neighbors_to};
-    *neighbors_to = invedges;
+    (graph->neighbor_table)[to - 1] = invedges;
 };
 
 void destroy_graph(struct bi_graph* graph){
