@@ -21,7 +21,7 @@ struct neighbor_list
 
 /* Graph functions */
 struct bi_graph* init_bi_graph(int x, int y, int e);
-void init_add_edge(struct bi_graph* graph, struct neighbor_list* forwards, struct neighbor_list* backwards, int from, int to);
+void init_add_edge(struct bi_graph* graph, struct neighbor_list* edgess, struct neighbor_list* invedgess, int from, int to);
 void destroy_graph(struct bi_graph* graph);
 
 #endif

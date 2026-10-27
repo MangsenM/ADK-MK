@@ -19,14 +19,14 @@ void readBipartiteGraph(struct bi_graph* graph) {
   graph = init_bi_graph(x,y,e);
 
   // Läs in kanterna
-  struct neighbor_list* forwards = &(graph->neighbor_table)[x+y];
-  struct neighbor_list* backwards = &(graph->neighbor_table)[x+y+e];
+  struct neighbor_list* edges = (graph->neighbors);
+  struct neighbor_list* invedges = (graph->neighbor_table)[e];
   for (int i = 0; i < e; ++i) {
     int a, b;
     scanf("%d %d", &a, &b);
-    init_add_edge(graph,forwards,backwards,a,b);
-    forwards++;
-    backwards++;
+    init_add_edge(graph,edges,invedges,a,b);
+    edges++;
+    invedges++;
   }
 }
 
@@ -36,17 +36,17 @@ void writeFlowGraph(struct bi_graph* graph) {
   // Skriv ut antal hörn och kanter samt källa och sänka
   printf("%d\n%d %d\n%d\n", v, s, t, e);
   
-  for (int i = 1 ; i < graph->x ; i++){
+  for (int i = 1 ; i <= graph->x ; i++){
     printf("%d%d%d",s,i,1);
   }
-  for (int i = 1 ; i < (graph->y - graph->x) ; i++){
+  for (int i = graph->x + 1 ; i <= graph->y; i++){
     printf("%d%d%d",i,t,1);
   }
   for (int i = 0 ; i < graph->x ; i++){
-    struct neighbor_list x_neighbors = graph->neighbor_table[i];
-    while(x_neighbors.neighbor){
-      printf("%d%d%d",i+1,x_neighbors.neighbor,1);
-      x_neighbors = *x_neighbors.tail;
+    struct neighbor_list* x_neighbors = graph->neighbor_table[i];
+    while(x_neighbors->tail != NULL){
+      printf("%d%d%d",i+1,x_neighbors->neighbor,1);
+      x_neighbors = x_neighbors->tail;
     }
   }
 
