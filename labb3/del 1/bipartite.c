@@ -13,13 +13,14 @@
  */
 struct bi_graph* init_bi_graph(int x, int y, int e){
     struct bi_graph* graph = malloc(sizeof(struct bi_graph));
-    struct neighbor_list* neighbor = malloc(sizeof(struct neighbor_list)*(x+y+2*e));
+    struct neighbor_list** neighbor_table = malloc(sizeof(struct neighbor_list**))
+    struct neighbor_list* neighbors = malloc(sizeof(struct neighbor_list)*(2*e));
 
     for(int i = 0; i < x+y-1 ; i++){
-        *(neighbor+i) = (struct neighbor_list) {};
+        *(neighbors+i) = (struct neighbor_list) {};
     }
 
-    *graph = (struct bi_graph) {x, y, e, neighbor};
+    *graph = (struct bi_graph) {x, y, e, neighbors};
 
     return graph;
 };

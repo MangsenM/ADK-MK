@@ -7,7 +7,8 @@ struct bi_graph
     int x;
     int y;
     int e;
-    struct neighbor_list* neighbor_table; //allocate x+y list heads
+    struct neighbor_list** neighbor_table; //allocate x+y list heads
+    struct neighbor_list* neighbors;
 };
 
 struct neighbor_list
