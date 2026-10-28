@@ -63,28 +63,20 @@ int* BFS(struct flow_graph* cf){
 
     while(front!=back){
         int curr = queue[front++];
-        if (visited[curr-1] == 0){
-            struct neighbor_list* neighbors = cf->neighbor_table[curr-1];
+
+        struct neighbor_list* neighbors = cf->neighbor_table[curr-1];
             
-            while(neighbors->tail!=NULL){
-                int nbr = neighbors->neighbor;
-                if(visited[nbr-1]==0 && neighbors->capacatiy > 0){
-                    queue[back++] = nbr;
-                    visited[nbr-1] = curr;
-                    if(nbr == cf){
-                        path = reconstructPath(cf->s,cf->t,visited);
-                    }
+        while(neighbors->tail!=NULL){
+            int nbr = neighbors->neighbor;
+            if(visited[nbr-1]==0 && neighbors->capacatiy > 0){
+                queue[back++] = nbr;
+                visited[nbr-1] = curr;
+                if(nbr == cf->t){
+                    path = reconstructPath(cf->s,cf->t,visited);
                 }
             }
         }
     }
-
-    /**
-     * - Add s to queue (mark visited)
-     * - While queue not empty
-     *   - pop head, check all neighbors if not visited(check if t then finish else, add queue, add visited (value of parent to track path))
-     * - if empty no path return NULL
-     */
 
     free(visited);
     free(queue);
