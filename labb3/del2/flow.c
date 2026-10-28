@@ -1,23 +1,23 @@
 /**
  * Datastructure for bipartite graph with optionaly weighted edges
  * 
- * @author Karmela Eliasson and Malcolm Mangsén
+ * @author Karmela Eliasson and Malcolm Mångsén
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "graphutil.h"
-
 /**
  * 
  * Allocates struct for new graph
  */
-struct flow_graph* init_bi_graph(int v, int e, int s, int t){
+struct flow_graph* init_flow_graph(int v, int e, int s, int t){
     struct flow_graph* graph = malloc(sizeof(struct flow_graph));
     struct neighbor_list** neighbor_table = calloc(v, sizeof(struct neighbor_list*));
     struct neighbor_list* neighbor_list = calloc(2*e, sizeof(struct neighbor_list));
 
-    *graph = (struct flow_graph) {v, e, s, t, neighbor_table, neighbor_list};
+    *graph = (struct flow_graph) {v, e, s, t, 0, neighbor_table, neighbor_list};
 
     return graph;
 };
@@ -50,11 +50,12 @@ void destroy_graph(struct flow_graph* graph){
 }
 
 int* reconstructPath(int t, int len, int* visited){
-    int* path = malloc(sizeof(int)*len);
+    int* path = malloc(sizeof(int)*len + 1);
 
-    path[len-1]=t;
+    path[len]=t;
 
-    for (int i = len-2 ; i > 0 ; i--){
+    //path[0] contains min(c(p)) = flow
+    for (int i = len-1 ; i >= 0 ; i--){
         path[i] = visited[path[i+1]];
     }
 
@@ -71,16 +72,22 @@ int* BFS(struct flow_graph* cf){
     int* path = NULL;
 
     queue[back++] = cf->s;
-    visited[cf->s] = -1;
+    visited[cf->s] = INT_MAX;
 
     while(front!=back){
         int curr = queue[front++];
 
         struct neighbor_list* neighbors = cf->neighbor_table[curr-1];
             
-        while(neighbors->tail!=NULL){
+        int check = 1;
+        if(neighbors->tail==NULL){
+                check = 0;
+        }
+        while(check){
             int nbr = neighbors->neighbor;
             if(visited[nbr-1]==0 && neighbors->capacity > 0){
+                
+                visited[cf->s] = visited[cf->s] > neighbors->capacity ? neighbors->capacity : visited[cf->s];
                 queue[back++] = nbr;
                 visited[nbr-1] = curr;
 
@@ -88,6 +95,11 @@ int* BFS(struct flow_graph* cf){
                 if(nbr == cf->t){
                     path = reconstructPath(cf->t, pathLen, visited);
                 }
+            }
+            if(neighbors->tail==NULL){
+                check = 0;
+            } else {
+                neighbors = neighbors->tail;
             }
         }
     }
@@ -97,6 +109,3 @@ int* BFS(struct flow_graph* cf){
 
     return path;
 }
-
-
-int minCapacityPath(int* path);

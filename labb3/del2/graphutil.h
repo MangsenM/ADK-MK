@@ -8,6 +8,7 @@ struct flow_graph
     int e;
     int s;
     int t;
+    int f;
     struct neighbor_list** neighbor_table; //allocate x+y list heads
     struct neighbor_list* neighbors;
 };
