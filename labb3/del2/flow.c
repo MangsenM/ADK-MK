@@ -54,6 +54,9 @@ int* BFS(struct flow_graph* cf){
     int* queue = calloc(cf->v, sizeof(int));
     int front = 0;
     int back = 0;
+    int pathLen = 0;
+
+    int* path = NULL;
 
     queue[back++] = cf->s;
     visited[cf->s] = -1;
@@ -62,7 +65,17 @@ int* BFS(struct flow_graph* cf){
         int curr = queue[front++];
         if (visited[curr-1] == 0){
             struct neighbor_list* neighbors = cf->neighbor_table[curr-1];
-            while(neighbors->)
+            
+            while(neighbors->tail!=NULL){
+                int nbr = neighbors->neighbor;
+                if(visited[nbr-1]==0 && neighbors->capacatiy > 0){
+                    queue[back++] = nbr;
+                    visited[nbr-1] = curr;
+                    if(nbr == cf){
+                        path = reconstructPath(cf->s,cf->t,visited);
+                    }
+                }
+            }
         }
     }
 
@@ -79,8 +92,10 @@ int* BFS(struct flow_graph* cf){
     return path;
 }
 
-int* reconstructPath(int s, int t, int* parent){
+int* reconstructPath(int s, int t, int* visited){
     /**
      * start at t and walk check parent[t] to get precious node
      */
 }
+
+int minCapasityPath();
