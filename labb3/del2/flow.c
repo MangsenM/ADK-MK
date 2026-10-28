@@ -27,18 +27,18 @@ void init_add_edge(struct flow_graph* graph, struct neighbor_list* edge, struct 
     struct neighbor_list** neighbors_to = (graph->neighbor_table)+to-1;
    
     if ((*neighbors_from) == NULL){
-        *edge = (struct neighbor_list) {to,capacity, invedge, NULL};
+        *edge = (struct neighbor_list) {from, to,capacity, invedge, NULL};
         (graph->neighbor_table)[from - 1] = edge;
     } else {
-        *edge = (struct neighbor_list) {to,capacity, invedge, *neighbors_from};
+        *edge = (struct neighbor_list) {from, to,capacity, invedge, *neighbors_from};
         (graph->neighbor_table)[from - 1] = edge;
     }
 
     if ((*neighbors_to) == NULL){
-        *invedge = (struct neighbor_list) {from,0,edge, NULL};
+        *invedge = (struct neighbor_list) {to, from,0,edge, NULL};
         (graph->neighbor_table)[to - 1] = invedge;
     } else {
-        *invedge = (struct neighbor_list) {from,0,edge,*neighbors_to};
+        *invedge = (struct neighbor_list) {to, from,0,edge,*neighbors_to};
         (graph->neighbor_table)[to - 1] = invedge;
     }
 };
@@ -49,51 +49,46 @@ void destroy_graph(struct flow_graph* graph){
     free(graph);
 }
 
-int* reconstructPath(int t, int len, int* visited){
-    int* path = malloc(sizeof(int)*len + 1);
+struct neighbor_list** reconstructPath(struct neighbor_list* last, int len, struct neighbor_list** visited){
+    struct neighbor_list** path = malloc(sizeof(struct neighbor_list*)*len);
 
-    path[len]=t;
+    path[len]=last;
 
     //path[0] contains min(c(p)) = flow
     for (int i = len-1 ; i >= 0 ; i--){
-        path[i] = visited[path[i+1]];
+        path[i] = visited[path[i+1]->node];
     }
 
     return path;
 }
 
-int* BFS(struct flow_graph* cf){
-    int* visited = calloc(cf->v, sizeof(int));
+struct neighbor_list** BFS(struct flow_graph* cf){
+    struct neighbor_list** visited = calloc(cf->v, sizeof(struct neighbor_list));
     int* queue = calloc(cf->v, sizeof(int));
     int front = 0;
     int back = 0;
     int pathLen = 1;
 
-    int* path = NULL;
+    struct neighbor_list** path = NULL;
 
     queue[back++] = cf->s;
-    visited[cf->s] = INT_MAX;
 
     while(front!=back){
         int curr = queue[front++];
 
         struct neighbor_list* neighbors = cf->neighbor_table[curr-1];
             
-        int check = 1;
-        if(neighbors->tail==NULL){
-                check = 0;
-        }
+        int check = neighbors->tail==NULL ? 0 : 1;
         while(check){
             int nbr = neighbors->neighbor;
-            if(visited[nbr-1]==0 && neighbors->capacity > 0){
+            if(visited[nbr-1]==NULL && neighbors->capacity > 0){
                 
-                visited[cf->s] = visited[cf->s] > neighbors->capacity ? neighbors->capacity : visited[cf->s];
                 queue[back++] = nbr;
-                visited[nbr-1] = curr;
+                visited[nbr-1] = neighbors;
 
                 pathLen++;
                 if(nbr == cf->t){
-                    path = reconstructPath(cf->t, pathLen, visited);
+                    path = reconstructPath(neighbors, pathLen, visited);
                 }
             }
             if(neighbors->tail==NULL){
@@ -108,4 +103,16 @@ int* BFS(struct flow_graph* cf){
     free(queue);
 
     return path;
+}
+
+int findMinC(struct neighbor_list** p, int t) {
+    int minc = INT_MAX;
+    
+    for(int i = -1; (*p)[i].neighbor != t; ++i){
+        if((*p)[i].capacity < minc){
+            minc = (*p)[i].capacity;
+        }
+    }
+    
+    return minc;
 }

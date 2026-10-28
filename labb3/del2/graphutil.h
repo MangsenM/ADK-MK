@@ -15,6 +15,7 @@ struct flow_graph
 
 struct neighbor_list
 {
+    int node;
     int neighbor;
     int capacity;
     struct neighbor_list* inverse;
@@ -25,5 +26,7 @@ struct neighbor_list
 struct flow_graph* init_flow_graph(int v, int e, int s, int t);
 void init_add_edge(struct flow_graph* graph, struct neighbor_list* edges, struct neighbor_list* invedges, int from, int to, int capacity);
 void destroy_graph(struct flow_graph* graph);
+struct neighbor_list** BFS(struct flow_graph* cf);
+int findMinC(struct neighbor_list** p, int t);
 
 #endif
