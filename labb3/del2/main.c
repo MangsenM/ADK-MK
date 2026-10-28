@@ -18,6 +18,7 @@ struct bi_graph* readFlowGraph(){
 } 
 
 int main(void) {
+/**
   struct bi_graph* graph = readBipartiteGraph();
 
   writeFlowGraph(graph);
@@ -27,6 +28,7 @@ int main(void) {
   struct bi_graph* flowgraph = readMaxFlowSolution();
 
   writeBipMatchSolution(flowgraph);
+**/
   // debugutskrift
   //fprintf(stderr, "Bipred avslutar\n");
   return 0;

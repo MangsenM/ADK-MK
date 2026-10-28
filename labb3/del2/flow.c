@@ -22,15 +22,15 @@ struct flow_graph* init_bi_graph(int v, int e, int s, int t){
     return graph;
 };
 
-void init_add_edge(struct flow_graph* graph, struct neighbor_list* edge, struct neighbor_list* invedge, int from, int to, int capasity){
+void init_add_edge(struct flow_graph* graph, struct neighbor_list* edge, struct neighbor_list* invedge, int from, int to, int capacity){
     struct neighbor_list** neighbors_from = (graph->neighbor_table)+from-1;
     struct neighbor_list** neighbors_to = (graph->neighbor_table)+to-1;
    
     if ((*neighbors_from) == NULL){
-        *edge = (struct neighbor_list) {to,capasity, invedge, NULL};
+        *edge = (struct neighbor_list) {to,capacity, invedge, NULL};
         (graph->neighbor_table)[from - 1] = edge;
     } else {
-        *edge = (struct neighbor_list) {to,capasity, invedge, *neighbors_from};
+        *edge = (struct neighbor_list) {to,capacity, invedge, *neighbors_from};
         (graph->neighbor_table)[from - 1] = edge;
     }
 
@@ -47,6 +47,18 @@ void destroy_graph(struct flow_graph* graph){
     free(graph->neighbor_table);
     free(graph->neighbors);
     free(graph);
+}
+
+int* reconstructPath(int t, int len, int* visited){
+    int* path = malloc(sizeof(int)*len);
+
+    path[len-1]=t;
+
+    for (int i = len-2 ; i > 0 ; i--){
+        path[i] = visited[path[i+1]];
+    }
+
+    return path;
 }
 
 int* BFS(struct flow_graph* cf){
@@ -68,7 +80,7 @@ int* BFS(struct flow_graph* cf){
             
         while(neighbors->tail!=NULL){
             int nbr = neighbors->neighbor;
-            if(visited[nbr-1]==0 && neighbors->capacatiy > 0){
+            if(visited[nbr-1]==0 && neighbors->capacity > 0){
                 queue[back++] = nbr;
                 visited[nbr-1] = curr;
 
@@ -86,16 +98,5 @@ int* BFS(struct flow_graph* cf){
     return path;
 }
 
-int* reconstructPath(int t, int len, int* visited){
-    int* path = malloc(sizeof(int)*len);
 
-    path[len-1]=t;
-
-    for (int i = len-2 ; i > 0 ; i--){
-        path[i] = visited[path[i+1]];
-    }
-
-    return path;
-}
-
-int minCapasityPath(path);
+int minCapacityPath(int* path);

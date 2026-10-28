@@ -15,14 +15,14 @@ struct flow_graph
 struct neighbor_list
 {
     int neighbor;
-    int capacatiy;
+    int capacity;
     struct neighbor_list* inverse;
     struct neighbor_list* tail;
 };
 
 /* Graph functions */
-struct flow_graph* init_flow_graph(int x, int y, int e);
-void init_add_edge(struct flow_graph* graph, struct neighbor_list* edgess, struct neighbor_list* invedgess, int from, int to, int capasity);
+struct flow_graph* init_flow_graph(int v, int e, int s, int t);
+void init_add_edge(struct flow_graph* graph, struct neighbor_list* edges, struct neighbor_list* invedges, int from, int to, int capacity);
 void destroy_graph(struct flow_graph* graph);
 
 #endif
