@@ -50,9 +50,21 @@ void destroy_graph(struct flow_graph* graph){
 }
 
 int* BFS(struct flow_graph* cf){
-    int *visited = calloc(cf->v, sizeof(int));
-    int *queue = calloc(cf->v, sizeof(int));
-    int queue_counter = 0;
+    int* visited = calloc(cf->v, sizeof(int));
+    int* queue = calloc(cf->v, sizeof(int));
+    int front = 0;
+    int back = 0;
+
+    queue[back++] = cf->s;
+    visited[cf->s] = -1;
+
+    while(front!=back){
+        int curr = queue[front++];
+        if (visited[curr-1] == 0){
+            struct neighbor_list* neighbors = cf->neighbor_table[curr-1];
+            while(neighbors->)
+        }
+    }
 
     /**
      * - Add s to queue (mark visited)
