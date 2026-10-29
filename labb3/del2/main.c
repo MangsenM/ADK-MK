@@ -32,85 +32,53 @@ struct flow_graph* readFlowGraph(){
   return fgraph;
 } 
 
-struct flow_graph* findMaxFlowGraph(struct flow_graph* cgraph){
-    
-  struct flow_graph* fgraph = init_flow_graph(cgraph->v,cgraph->e,cgraph->s,cgraph->t);
-  struct neighbor_list* edge = cgraph->neighbors;
-  struct neighbor_list* invedge = cgraph->neighbors+fgraph->e;
 
-  struct flow_graph* cfgraph = init_flow_graph(cgraph->v,cgraph->e,cgraph->s,cgraph->t);
+//forwards for cf, backwards for f and cf+f for c TODO: Implement
+//forwards cf so that BFS works (want to iterate search on cf)
+void findMaxFlowGraph(struct flow_graph* cgraph){
+  while(1){
+    struct neighbor_list** tree = BFS(cgraph);
 
-  for (int i = 0; i < cgraph->v; i++){
-    struct neighbor_list* cgnlist = cgraph->neighbor_table[i];
-
-    int check = cgnlist->tail == NULL ? 0 : 1;
-
-    while(check == 1){
-            init_add_edge(fgraph, edge, invedge, i + 1, cgnlist->neighbor, 0);
-            init_add_edge(cfgraph, edge, invedge, i + 1, cgnlist->neighbor, cgnlist->capacity);
-            
-            edge++;
-            invedge++;
-        if(cgnlist->tail == NULL){
-            check = 0;
-        } else {
-            cgnlist = cgnlist->tail;
-        }
+    if (tree == NULL){ //done when no path to increse flow
+      return;
     }
+
+    int* LenAndMinC = findLenAndMinC(tree, cgraph->s, cgraph->t);
+    int len = LenAndMinC[0];
+    int minC = LenAndMinC[1];
+    struct neighbor_list** path = reconstructPath(tree, len, cgraph->t);
+
+    for(int i = 0 ; i < len ; i++){
+      path[i]->capacity-=minC;
+      path[i]->inverse->capacity+=minC;
+    }
+    cgraph->f += minC;
   }
-
-  struct neighbor_list** p = BFS(cgraph);
-  int minc = findMinC(p, cgraph->t);
-  
-  for(int i = -1; (*p)[i].neighbor != cgraph->t; ++i){
-        
-        fgraph->neighbors
-
-  }
-
-
-  
-
 }
 
 void writeMaxFlowSolution(struct flow_graph* flowgraph){
+  printf("%d\n%d %d %d\n%d\n", flowgraph->v, flowgraph->s,flowgraph->t,flowgraph->f, flowgraph->e);
+
+  struct neighbor_list* edges = flowgraph->neighbors; 
+
+  //iterates over forward edges (not inverses)
+  for (int i = 0; i < flowgraph->e; i++){
+    printf("%d %d %d\n",(edges+i)->node,(edges+i)->neighbor,(edges+i)->inverse->capacity);
+  }
+  fflush(stdout);
 }
 
-/**
-void writeMaxFlowSolution(struct flow_graph* flowgraph){
-  printf("%d\n%d %d\n%d\n", flowgraph->v, flowgraph->s,flowgraph->t,flowgraph->e);
-  
-  for (int i = 0; i < flowgraph->v; i++){
-    struct neighbor_list* fgnlist = flowgraph->neighbor_table[i];
-    int check = 1;
-    if(fgnlist->tail == NULL){
-        check = 0;
-    }
-    while(check == 1){
-        printf("%d %d %d\n", i + 1, fgnlist->neighbor, fgnlist->capacity);
-    if(fgnlist->tail == NULL){
-        check = 0;
-    } else {
-        fgnlist = fgnlist->tail;
-    }
-    }
-  }
-    fflush(stdout);
-}
-**/
 
 struct flow_graph* MaxFlowGraph(struct flow_graph* fgraph);
 
 int main(void) {
   struct flow_graph* fgraph = readFlowGraph();
 
-  struct flow_graph* maxfgraph = findMaxFlowGraph(fgraph);
+  findMaxFlowGraph(fgraph);
 
-  writeMaxFlowSolution(maxfgraph);
+  writeMaxFlowSolution(fgraph);
 
   destroy_graph(fgraph);
-  destroy_graph(maxfgraph);
-
 
   // debugutskrift
   //fprintf(stderr, "Bipred avslutar\n");

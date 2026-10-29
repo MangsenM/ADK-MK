@@ -49,27 +49,12 @@ void destroy_graph(struct flow_graph* graph){
     free(graph);
 }
 
-struct neighbor_list** reconstructPath(struct neighbor_list* last, int len, struct neighbor_list** visited){
-    struct neighbor_list** path = malloc(sizeof(struct neighbor_list*)*len);
-
-    path[len]=last;
-
-    //path[0] contains min(c(p)) = flow
-    for (int i = len-1 ; i >= 0 ; i--){
-        path[i] = visited[path[i+1]->node];
-    }
-
-    return path;
-}
-
 struct neighbor_list** BFS(struct flow_graph* cf){
     struct neighbor_list** visited = calloc(cf->v, sizeof(struct neighbor_list));
     int* queue = calloc(cf->v, sizeof(int));
     int front = 0;
     int back = 0;
     int pathLen = 1;
-
-    struct neighbor_list** path = NULL;
 
     queue[back++] = cf->s;
 
@@ -88,7 +73,10 @@ struct neighbor_list** BFS(struct flow_graph* cf){
 
                 pathLen++;
                 if(nbr == cf->t){
-                    path = reconstructPath(neighbors, pathLen, visited);
+                    free(visited);
+                    free(queue);
+
+                    return visited;
                 }
             }
             if(neighbors->tail==NULL){
@@ -102,17 +90,40 @@ struct neighbor_list** BFS(struct flow_graph* cf){
     free(visited);
     free(queue);
 
+    return NULL;
+}
+
+struct neighbor_list** reconstructPath(struct neighbor_list** visited, int len, int last){
+    struct neighbor_list** path = malloc(sizeof(struct neighbor_list*)*len);
+
+    path[len]=visited[last];
+
+    for (int i = len-1 ; i >= 0 ; i--){
+        path[i] = visited[path[i+1]->node];
+    }
+
     return path;
 }
 
-int findMinC(struct neighbor_list** p, int t) {
-    int minc = INT_MAX;
+int* findLenAndMinC(struct neighbor_list** visited, int s, int t) {
+    int* lenAminC[2] = {0,INT_MAX};
     
-    for(int i = -1; (*p)[i].neighbor != t; ++i){
-        if((*p)[i].capacity < minc){
-            minc = (*p)[i].capacity;
+    struct neighbor_list* curr = visited[t];
+
+    int check = 1;
+    while(check){
+        lenAminC[0]++; //increse path length
+
+        if(curr->capacity<lenAminC[1]){
+            lenAminC[1] = curr->capacity; //update c if new min
+        }
+        
+        if(curr->node == s){
+            check = 0;
+        } else{
+            curr = visited[curr->node];
         }
     }
-    
-    return minc;
+
+    return lenAminC;
 }
