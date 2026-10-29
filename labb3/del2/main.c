@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include "graphutil.h"
 
 
@@ -37,38 +38,34 @@ struct flow_graph* readFlowGraph(){
 //forwards for cf, backwards for f and cf+f for c TODO: Implement
 //forwards cf so that BFS works (want to iterate search on cf)
 void findMaxFlowGraph(struct flow_graph* cgraph){
-  while(1){
-    printf("i reached 0\n");
-    struct neighbor_list** tree = BFS(cgraph);
+  struct neighbor_list** searchTree = calloc(cgraph->v, sizeof(struct neighbor_list*));
 
-    if (tree == NULL){ //done when no path to increse flow
+  while(1){
+    if (BFS(cgraph, searchTree) == 0){ //done when no path to increse flow
+      free(searchTree);
       return;
     }
 
-    printf("i reached 1\n");
     int* lenAminC = malloc(sizeof(int)*2);
-    findLenAndMinC(tree,lenAminC, cgraph->s, cgraph->t);
-    printf("i reached 2\n");
+    findLenAndMinC(searchTree,lenAminC, cgraph->s, cgraph->t);
 
     int len = lenAminC[0];
     int minC = lenAminC[1];
 
     free(lenAminC); 
 
-    printf("minc: %d len: %d\n", minC, len);
+    struct neighbor_list** path = malloc(sizeof(struct neighbor_list*)*len);
+    reconstructPath(searchTree, path, len, cgraph->t);
 
-    printf("i reached 3\n");
-    struct neighbor_list** path = reconstructPath(tree, len, cgraph->t);
-    printf("i reached 4\n");
-
-    printf("path0: %d\n",path[1]->capacity);
     for(int i = 0 ; i < len ; i++){
       path[i]->capacity-=minC;
-      printf("test2\n");
       path[i]->inverse->capacity+=minC;
-      printf("test3\n");
     }
+
+    free(path);
     cgraph->f += minC;
+
+    memset(searchTree,0,cgraph->v*sizeof(struct neighbor_list*));
   }
 }
 
