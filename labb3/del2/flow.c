@@ -4,8 +4,8 @@
  * @author Karmela Eliasson and Malcolm Mångsén
  */
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <limits.h>
 #include "graphutil.h"
 /**
@@ -105,25 +105,28 @@ struct neighbor_list** reconstructPath(struct neighbor_list** visited, int len, 
     return path;
 }
 
-int* findLenAndMinC(struct neighbor_list** visited, int s, int t) {
-    int* lenAminC[2] = {0,INT_MAX};
+void findLenAndMinC(struct neighbor_list** visited, int* lenAminC, int s, int t) {
+    lenAminC[0] = 0;
+    lenAminC[1] = INT_MAX;
     
-    struct neighbor_list* curr = visited[t];
+    printf(" create currr\n");
+    struct neighbor_list* curr = visited[t - 1];
+    printf(" create currr done\n");
 
     int check = 1;
     while(check){
         lenAminC[0]++; //increse path length
 
-        if(curr->capacity<lenAminC[1]){
+        if(curr->capacity < lenAminC[1]){
             lenAminC[1] = curr->capacity; //update c if new min
         }
         
         if(curr->node == s){
             check = 0;
         } else{
-            curr = visited[curr->node];
+            printf(" get next curr\n");
+            curr = visited[curr->node - 1];
+            printf(" get next curr done\n");
         }
     }
-
-    return lenAminC;
 }

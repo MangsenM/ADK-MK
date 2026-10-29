@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include "graphutil.h"
 
@@ -43,10 +44,19 @@ void findMaxFlowGraph(struct flow_graph* cgraph){
       return;
     }
 
-    int* LenAndMinC = findLenAndMinC(tree, cgraph->s, cgraph->t);
-    int len = LenAndMinC[0];
-    int minC = LenAndMinC[1];
+    printf("i reached 1\n");
+    int* lenAminC = malloc(sizeof(int)*2);
+    findLenAndMinC(tree,lenAminC, cgraph->s, cgraph->t);
+    printf("i reached 2\n");
+
+    int len = lenAminC[0];
+    int minC = lenAminC[1];
+
+    free(lenAminC); 
+
+    printf("i reached 3\n");
     struct neighbor_list** path = reconstructPath(tree, len, cgraph->t);
+    printf("i reached 4\n");
 
     for(int i = 0 ; i < len ; i++){
       path[i]->capacity-=minC;

@@ -27,7 +27,7 @@ struct flow_graph* init_flow_graph(int v, int e, int s, int t);
 void init_add_edge(struct flow_graph* graph, struct neighbor_list* edges, struct neighbor_list* invedges, int from, int to, int capacity);
 void destroy_graph(struct flow_graph* graph);
 struct neighbor_list** BFS(struct flow_graph* cf);
-int* findLenAndMinC(struct neighbor_list** visited, int s, int t);
+void findLenAndMinC(struct neighbor_list** visited, int* lenAminC, int s, int t);
 struct neighbor_list** reconstructPath(struct neighbor_list** visited, int len, int last);
 
 #endif
