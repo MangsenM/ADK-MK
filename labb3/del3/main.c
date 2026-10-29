@@ -15,7 +15,6 @@
 
 /**
  * Create bipartite graph from stdin
- * 
  */
 struct bi_graph *readBipartiteGraph() {
   int x, y, e;
@@ -84,7 +83,6 @@ struct flow_graph* writeFlowGraph(struct bi_graph *graph) {
  * 
  * @param graph graph to find max flow in
  */
-//forwards for cf, backwards for f and cf+f for c
 void findMaxFlowGraph(struct flow_graph* graph){
   struct edge** searchTree = calloc(graph->v, sizeof(struct edge*));
 
