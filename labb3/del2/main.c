@@ -38,6 +38,7 @@ struct flow_graph* readFlowGraph(){
 //forwards cf so that BFS works (want to iterate search on cf)
 void findMaxFlowGraph(struct flow_graph* cgraph){
   while(1){
+    printf("i reached 0\n");
     struct neighbor_list** tree = BFS(cgraph);
 
     if (tree == NULL){ //done when no path to increse flow
@@ -54,13 +55,18 @@ void findMaxFlowGraph(struct flow_graph* cgraph){
 
     free(lenAminC); 
 
+    printf("minc: %d len: %d\n", minC, len);
+
     printf("i reached 3\n");
     struct neighbor_list** path = reconstructPath(tree, len, cgraph->t);
     printf("i reached 4\n");
 
+    printf("path0: %d\n",path[1]->capacity);
     for(int i = 0 ; i < len ; i++){
       path[i]->capacity-=minC;
+      printf("test2\n");
       path[i]->inverse->capacity+=minC;
+      printf("test3\n");
     }
     cgraph->f += minC;
   }

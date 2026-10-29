@@ -50,11 +50,10 @@ void destroy_graph(struct flow_graph* graph){
 }
 
 struct neighbor_list** BFS(struct flow_graph* cf){
-    struct neighbor_list** visited = calloc(cf->v, sizeof(struct neighbor_list));
+    struct neighbor_list** visited = calloc(cf->v, sizeof(struct neighbor_list*));
     int* queue = calloc(cf->v, sizeof(int));
     int front = 0;
     int back = 0;
-    int pathLen = 1;
 
     queue[back++] = cf->s;
 
@@ -71,7 +70,6 @@ struct neighbor_list** BFS(struct flow_graph* cf){
                 queue[back++] = nbr;
                 visited[nbr-1] = neighbors;
 
-                pathLen++;
                 if(nbr == cf->t){
                     free(visited);
                     free(queue);
@@ -96,12 +94,13 @@ struct neighbor_list** BFS(struct flow_graph* cf){
 struct neighbor_list** reconstructPath(struct neighbor_list** visited, int len, int last){
     struct neighbor_list** path = malloc(sizeof(struct neighbor_list*)*len);
 
-    path[len]=visited[last];
+    path[len-1]=visited[last-1];
 
-    for (int i = len-1 ; i >= 0 ; i--){
-        path[i] = visited[path[i+1]->node];
+    for (int i = len-2 ; i >= 0 ; i--){
+        path[i] = visited[path[i+1]->node-1];
     }
 
+    printf("path0: %d\n",path[1]->node);
     return path;
 }
 
@@ -112,9 +111,11 @@ void findLenAndMinC(struct neighbor_list** visited, int* lenAminC, int s, int t)
     printf(" create currr\n");
     struct neighbor_list* curr = visited[t - 1];
     printf(" create currr done\n");
+    printf("s: %d \n", s);
 
     int check = 1;
     while(check){
+        printf("%d \n", curr->node);
         lenAminC[0]++; //increse path length
 
         if(curr->capacity < lenAminC[1]){
