@@ -70,13 +70,22 @@ void findMaxFlowGraph(struct flow_graph* cgraph){
 }
 
 void writeMaxFlowSolution(struct flow_graph* flowgraph){
-  printf("%d\n%d %d %d\n%d\n", flowgraph->v, flowgraph->s,flowgraph->t,flowgraph->f, flowgraph->e);
-
   struct neighbor_list* edges = flowgraph->neighbors; 
+  int e = 0;
+
+  for (int i = 0; i < flowgraph->e; i++){
+    if((edges+i)->inverse->capacity > 0){
+        e++;
+    }
+  }
+  printf("%d\n%d %d %d\n%d\n", flowgraph->v, flowgraph->s,flowgraph->t,flowgraph->f, e);
+
 
   //iterates over forward edges (not inverses)
   for (int i = 0; i < flowgraph->e; i++){
+    if((edges+i)->inverse->capacity > 0){
     printf("%d %d %d\n",(edges+i)->node,(edges+i)->neighbor,(edges+i)->inverse->capacity);
+    }
   }
   fflush(stdout);
 }
