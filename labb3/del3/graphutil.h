@@ -1,31 +1,39 @@
 #ifndef GRAPHUTIL_H
 #define GRAPHUTIL_H
 
+struct graph {
+  int x;
+  int y;
+  int e;
+  int *edges;
+};
+
 /* Graph data structure */
-struct bi_graph
+struct flow_graph
 {
-    int x;
-    int y;
+    int v;
     int e;
-    struct neighbor_list* neighbor_table; //allocate x+y list heads
+    int s;
+    int t;
+    int f;
+    struct neighbor_list** neighbor_table; //allocate x+y list heads
+    struct neighbor_list* neighbors;
 };
 
 struct neighbor_list
 {
-    struct edge* ptr;
-    struct edge* inv_ptr;
-    struct neighbor_list* next;
-    struct neighbor_list* prev;
-};
-
-struct edge
-{
-    int to;
-    int capacatiy;
+    int node;
+    int neighbor;
+    int capacity;
+    struct neighbor_list* inverse;
+    struct neighbor_list* tail;
 };
 
 /* Graph functions */
-struct bi_graph* init_bi_graph(int x, int y, int e);
-void add_edge(struct bi_graph* graph, int from, int to);
+struct flow_graph* init_flow_graph(int v, int e, int s, int t);
+void init_add_edge(struct flow_graph* graph, struct neighbor_list* edges, struct neighbor_list* invedges, int from, int to, int capacity);
+int BFS(struct flow_graph* cf, struct neighbor_list** visited);
+void findLenAndMinC(struct neighbor_list** visited, int* lenAminC, int s, int t);
+void reconstructPath(struct neighbor_list** visited, struct neighbor_list** path, int len, int last);
 
 #endif
