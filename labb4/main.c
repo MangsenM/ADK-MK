@@ -32,7 +32,11 @@ void color2cast(struct graph* graph){
     }
     
     //n, s, k values.
-    printf("%d\n%d\n%d\n", graph->v + 3, graph->v + 2, graph->m + 1);
+    printf("%d\n%d\n%d\n", graph->v + 3, graph->v + 2, graph->m + 3);
+    
+    //divas
+    printf("1 1\n");
+    printf("1 2\n");
 
     //role restrictions
     for(int i = 0; i < graph->v; i++){
@@ -40,31 +44,29 @@ void color2cast(struct graph* graph){
         printf("%d", graph->m);
 
         for (int j = 1; j <= graph->m; j++){
-            printf(" %d", j);
+            printf(" %d", j + 2);
         }
 
         printf("\n");
     }
     
     //bonus nodes
-    printf("1 %d\n", graph->m + 1);
-    printf("1 1\n");
-    printf("1 2\n");
+    printf("1 %d\n", graph->m + 3);
 
     //scenes
 
     for (int i = 0; i < graph->v; i++){
 
         if (graph->nb_table[i] == NULL){
-            printf("2 %d %d\n", i + 1, graph->m + 1);
+            printf("2 %d %d\n", i + 3, graph->v + 3);
 
         } else {
-            printf("%d %d", graph->nb_table[i]->length + 1, i + 1);
+            printf("%d %d", graph->nb_table[i]->length + 1, i + 3);
             
             struct nb_list* curr = graph->nb_table[i];
 
             for (int j = 0; j < graph->nb_table[i]->length; j++){
-                printf(" %d", curr->nb);
+                printf(" %d", curr->nb + 2);
                 curr = curr->tail;
             }
             printf("\n");
@@ -72,9 +74,9 @@ void color2cast(struct graph* graph){
         }
     }
 
-    //divas
-    printf("2 %d %d\n", graph->v + 1, graph->v + 2);
-    printf("2 %d %d\n", graph->v + 1, graph->v + 3);
+    //divas scenes
+    printf("2 %d 1\n", graph->v + 3);
+    printf("2 %d 2\n", graph->v + 3);
 
     fflush(stdout);
 }
