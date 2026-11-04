@@ -27,7 +27,7 @@ void color2cast(struct graph* graph){
         return;
 
     } else if (graph->m == 1 && graph->e > 0){
-        printf ("1\n1\n2\n2 1 2\n2 1\n");
+        printf ("1\n1\n2\n2 1 2\n1 1");
         return;
     }
     
@@ -73,8 +73,9 @@ void color2cast(struct graph* graph){
     }
 
     //divas
-    printf("2 %d 1\n", graph->v + 1);
-    printf("2 %d 2\n", graph->v + 1);
+    printf("2 %d %d\n", graph->v + 1, graph->v + 2);
+    printf("2 %d %d\n", graph->v + 1, graph->v + 3);
+
     fflush(stdout);
 }
 
