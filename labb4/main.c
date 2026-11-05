@@ -17,6 +17,8 @@ struct graph* readColorInstance() {
         ins_pos++;
     }
 
+    rmIsolatedNodes(graph);
+
     return graph;
 }
 
@@ -57,16 +59,14 @@ void color2cast(struct graph* graph){
 
     for (int i = 0; i < graph->v; i++){
 
-        if (graph->nb_table[i] == NULL){
-            printf("2 %d %d\n", i + 3, graph->v + 3);
-
-        } else {
-            printf("%d %d", graph->nb_table[i]->length + 1, i + 3);
+        if (graph->nb_table[i] == NULL || graph->nb_table[i] == getDummy());
+        else {
+            printf("%d %d", graph->nb_table[i]->length + 1, graph->names[i] + 3);
             
             struct nb_list* curr = graph->nb_table[i];
 
             for (int j = 0; j < graph->nb_table[i]->length; j++){
-                printf(" %d", curr->nb + 2);
+                printf(" %d", *curr->nb + 2);
                 curr = curr->tail;
             }
             printf("\n");
