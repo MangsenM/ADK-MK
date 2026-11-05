@@ -3,6 +3,7 @@
 
 struct graph{
     int v;
+    int max;
     int e;
     int m;
     int s;

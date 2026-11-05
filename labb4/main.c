@@ -24,7 +24,7 @@ struct graph* readColorInstance() {
 
 void color2cast(struct graph* graph){
     //to do spex case m = 1
-    if (graph->m == 1 && graph->e == 0){
+    if (graph->m == 1 && graph->e == 0 || graph->m > graph->max){
         printf ("3\n2\n3\n1 1\n1 2\n1 3\n2 1 3\n2 2 3\n");
         return;
 
@@ -32,6 +32,7 @@ void color2cast(struct graph* graph){
         printf ("1\n1\n2\n2 1 2\n1 1\n");
         return;
     }
+
     
     //n, s, k values.
     printf("%d\n%d\n%d\n", graph->v + 3, graph->s+2, graph->m + 3);

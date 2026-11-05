@@ -18,7 +18,7 @@ struct graph* initGraph(int v, int e, int m){
         names[i] = i+1;
     }
 
-    *graph = (struct graph) {v, e, m, 0, names, nb_table, edges};
+    *graph = (struct graph) {v, 0, e, m, 0, names, nb_table, edges};
 
     return graph;
 };
@@ -65,5 +65,5 @@ void rmIsolatedNodes(struct graph* graph){
     graph->s = entry_point;
 
     //limit colors to number of nodes
-    graph->m = graph->m < maxValance + 1 ? graph->m : maxValance + 1;
+    graph->max = maxValance;
 }
