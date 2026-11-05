@@ -61,4 +61,7 @@ void rmIsolatedNodes(struct graph* graph){
 
     graph->v = v_updated;
     graph->s = entry_point;
+
+    //limit colors to number of nodes
+    graph->m = graph->m < graph->v ? graph->m : graph->v;
 }
