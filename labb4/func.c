@@ -46,7 +46,7 @@ void rmIsolatedNodes(struct graph* graph){
     int v_updated = graph->v;
 
     for(int i = 0 ; i < graph->v ; i++){
-        if(graph->nb_table[i] = NULL){
+        if(graph->nb_table[i] == NULL){
             nr_removed++;
             v_updated--;
             graph->nb_table[i] = NULL;

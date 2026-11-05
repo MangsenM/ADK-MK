@@ -75,8 +75,7 @@ void color2cast(struct graph* graph){
     }
 
     //divas scenes
-    printf("2 %d 1\n", graph->v + 3);
-    printf("2 %d 2\n", graph->v + 3);
+    printf("3 %d 1 2\n", graph->v + 3);
 
     fflush(stdout);
 }
