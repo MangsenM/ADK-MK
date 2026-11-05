@@ -45,6 +45,7 @@ void rmIsolatedNodes(struct graph* graph){
     int nr_removed = 0;
     int entry_point = 0;
     int v_updated = graph->v;
+    int maxValance = 0;
 
     for(int i = 0 ; i < graph->v ; i++){
         if(graph->nb_table[i] == NULL){
@@ -52,6 +53,7 @@ void rmIsolatedNodes(struct graph* graph){
             v_updated--;
             graph->names[i] = 0;
         } else {
+            maxValance = maxValance < graph->nb_table[i]->length ? graph->nb_table[i]->length : maxValance;
             graph->names[i] = graph->names[i]-nr_removed;
             if(graph->nb_table[i] != &dummy){
                 entry_point++;
@@ -63,5 +65,5 @@ void rmIsolatedNodes(struct graph* graph){
     graph->s = entry_point;
 
     //limit colors to number of nodes
-    graph->m = graph->m < graph->v ? graph->m : graph->v;
+    graph->m = graph->m < maxValance + 1 ? graph->m : maxValance + 1;
 }
