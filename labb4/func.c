@@ -18,7 +18,7 @@ struct graph* initGraph(int v, int e, int m){
         names[i] = i+1;
     }
 
-    *graph = (struct graph) {v, e, m, names, nb_table, edges};
+    *graph = (struct graph) {v, e, m, 0, names, nb_table, edges};
 
     return graph;
 };
@@ -43,6 +43,7 @@ void initEdge(struct graph* graph, struct nb_list* edge, int from, int to){
 
 void rmIsolatedNodes(struct graph* graph){
     int nr_removed = 0;
+    int entry_point = 0;
     int v_updated = graph->v;
 
     for(int i = 0 ; i < graph->v ; i++){
@@ -52,8 +53,12 @@ void rmIsolatedNodes(struct graph* graph){
             graph->nb_table[i] = NULL;
         } else {
             graph->names[i]-= nr_removed;
+            if(graph->nb_table[i] != &dummy){
+                entry_point++;
+            }
         }
     }
 
     graph->v = v_updated;
+    graph->s = entry_point;
 }

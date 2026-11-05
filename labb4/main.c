@@ -34,7 +34,7 @@ void color2cast(struct graph* graph){
     }
     
     //n, s, k values.
-    printf("%d\n%d\n%d\n", graph->v + 3, graph->v + 2, graph->m + 3);
+    printf("%d\n%d\n%d\n", graph->v + 3, graph->s+1, graph->m + 3);
     
     //divas
     printf("1 1\n");

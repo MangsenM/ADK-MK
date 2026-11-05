@@ -5,6 +5,7 @@ struct graph{
     int v;
     int e;
     int m;
+    int s;
     int* names;
     struct nb_list** nb_table;
     struct nb_list* edges;
