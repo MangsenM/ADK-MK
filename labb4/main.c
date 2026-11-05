@@ -61,12 +61,12 @@ void color2cast(struct graph* graph){
 
         if (graph->nb_table[i] == NULL || graph->nb_table[i] == getDummy());
         else {
-            printf("%d %d", graph->nb_table[i]->length + 1, graph->names[i] + 3);
+            printf("%d %d", graph->nb_table[i]->length + 1, graph->names[i] + 2);
             
             struct nb_list* curr = graph->nb_table[i];
 
             for (int j = 0; j < graph->nb_table[i]->length; j++){
-                printf(" %d", *curr->nb + 2);
+                printf(" %d", *(curr->nb) + 2);
                 curr = curr->tail;
             }
             printf("\n");

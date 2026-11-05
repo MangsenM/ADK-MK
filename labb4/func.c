@@ -14,7 +14,7 @@ struct graph* initGraph(int v, int e, int m){
     struct nb_list* edges = calloc(e, sizeof(struct nb_list));
     int* names = calloc(v,sizeof(int));
 
-    for (int i = 0 ; i <=v ; i++){
+    for (int i = 0 ; i < v ; i++){
         names[i] = i+1;
     }
 
@@ -29,10 +29,10 @@ void initEdge(struct graph* graph, struct nb_list* edge, int from, int to){
 
     //special handling for first edge from node
     if ((*nb_from) == NULL || (*nb_from) == &dummy){
-        *edge = (struct nb_list) {1, graph->names+to, NULL};
+        *edge = (struct nb_list) {1, graph->names+to-1, NULL};
         (graph->nb_table)[from - 1] = edge;
     } else {
-        *edge = (struct nb_list) {graph->nb_table[from - 1]->length + 1, graph->names+to, graph->nb_table[from -1]};
+        *edge = (struct nb_list) {graph->nb_table[from - 1]->length + 1, graph->names+to-1, graph->nb_table[from -1]};
         (graph->nb_table)[from - 1] = edge;
     }
 
@@ -50,9 +50,9 @@ void rmIsolatedNodes(struct graph* graph){
         if(graph->nb_table[i] == NULL){
             nr_removed++;
             v_updated--;
-            graph->nb_table[i] = NULL;
+            graph->names[i] = 0;
         } else {
-            graph->names[i]-= nr_removed;
+            graph->names[i] = graph->names[i]-nr_removed;
             if(graph->nb_table[i] != &dummy){
                 entry_point++;
             }
