@@ -67,3 +67,4 @@ void rmIsolatedNodes(struct graph* graph){
     //limit colors to number of nodes
     graph->max = maxValance;
 }
+

@@ -62,16 +62,29 @@ void color2cast(struct graph* graph){
 
         if (graph->nb_table[i] == NULL || graph->nb_table[i] == getDummy());
         else {
-            printf("%d %d", graph->nb_table[i]->length + 1, graph->names[i] + 2);
             
             struct nb_list* curr = graph->nb_table[i];
+            int *visited = calloc(graph->v, sizeof(int));
+            int count = 1;
 
             for (int j = 0; j < graph->nb_table[i]->length; j++){
-                printf(" %d", *(curr->nb) + 2);
+                
+                if (visited[*curr->nb - 1] == 0){
+                    visited[*curr->nb - 1] = *(curr->nb) + 2;
+                    count++;
+                }
                 curr = curr->tail;
             }
+            printf("%d %d", count, graph->names[i] + 2);
+
+            for (int j = 0; j < graph->v; j++){
+                
+                if (visited[j] != 0){
+                    printf(" %d", visited[j]);
+                }
+            }
             printf("\n");
-            
+            free(visited);
         }
     }
 
