@@ -8,16 +8,18 @@ struct graph* readColorInstance() {
 
     struct graph* graph = initGraph(v, e, m);
 
-    struct nb_list* ins_pos = graph->edges;
-
     for (int i = 0; i < e; i++){
         int from, to;
         scanf("%d%d", &from, &to);
-        initEdge(graph, ins_pos, from, to);
-        ins_pos++;
+        graph->nb_table[to - 1][from - 1] = (struct edge){to, from};
+        graph->val[from - 1]++;
+    }
+    
+    for (int i = 0; i < v; i ++){
+        graph->max = graph->max < graph->val[i] ? graph->val[i] : graph->max;
     }
 
-    rmIsolatedNodes(graph);
+    //rmIsolatedNodes(graph);
 
     return graph;
 }
@@ -59,33 +61,17 @@ void color2cast(struct graph* graph){
     //scenes
 
     for (int i = 0; i < graph->v; i++){
-
-        if (graph->nb_table[i] == NULL || graph->nb_table[i] == getDummy());
-        else {
-            
-            struct nb_list* curr = graph->nb_table[i];
-            int *visited = calloc(graph->v, sizeof(int));
-            int count = 1;
-
-            for (int j = 0; j < graph->nb_table[i]->length; j++){
-                
-                if (visited[*curr->nb - 1] == 0){
-                    visited[*curr->nb - 1] = *(curr->nb) + 2;
-                    count++;
-                }
-                curr = curr->tail;
+        
+        if (graph->nb_table[i] != NULL){
+            printf("%d %d", graph->val[i], i + 2);
+        for (int j = 0; i < graph->e; i++){
+            if (graph->nb_table[i][j].to != 0){
+                printf(" %d",graph->nb_table[i][j].to);
             }
-            printf("%d %d", count, graph->names[i] + 2);
-
-            for (int j = 0; j < graph->v; j++){
-                
-                if (visited[j] != 0){
-                    printf(" %d", visited[j]);
-                }
-            }
-            printf("\n");
-            free(visited);
         }
+            printf("\n");
+        }
+
     }
 
     //divas scenes
@@ -96,7 +82,10 @@ void color2cast(struct graph* graph){
 }
 
 void destroyGraph(struct graph* graph){
-    free(graph->edges);
+    for(int i = 0; i < graph->v; i++){
+    free(graph->nb_table[i]);
+    }
+    free(graph->val);
     free(graph);
 }
 

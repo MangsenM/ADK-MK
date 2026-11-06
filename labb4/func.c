@@ -2,27 +2,27 @@
 #include <stdio.h>
 #include "graph.h"
 
-struct nb_list dummy = (struct nb_list) {1, (int*) NULL, (struct nb_list*) NULL};
+/**struct nb_list dummy = (struct nb_list) {1, (int*) NULL, (struct nb_list*) NULL};
 
 struct nb_list* getDummy(){
     return &dummy;
 }
-
+**/
 struct graph* initGraph(int v, int e, int m){
     struct graph* graph = malloc(sizeof(struct graph));
-    struct nb_list** nb_table = calloc(v, sizeof(struct nb_list*));
-    struct nb_list* edges = calloc(e, sizeof(struct nb_list));
-    int* names = calloc(v,sizeof(int));
+    struct edge** nb_table = calloc(v, sizeof(struct edge*));
+    int* val = calloc(v, sizeof(struct edge*));
 
     for (int i = 0 ; i < v ; i++){
-        names[i] = i+1;
+        nb_table[i] = calloc(e,sizeof(struct edge));
     }
 
-    *graph = (struct graph) {v, 0, e, m, 0, names, nb_table, edges};
+    *graph = (struct graph) {v, 0, e, m, 0, val, nb_table};
 
     return graph;
 };
 
+/**
 void initEdge(struct graph* graph, struct nb_list* edge, int from, int to){
     struct nb_list** nb_from = (graph->nb_table)+from-1; // -1 as edges 1 indexed
     struct nb_list** nb_to = (graph->nb_table)+to-1;
@@ -40,7 +40,9 @@ void initEdge(struct graph* graph, struct nb_list* edge, int from, int to){
         (graph->nb_table)[to - 1] = &dummy;
     }
 };
+**/
 
+/**
 void rmIsolatedNodes(struct graph* graph){
     int nr_removed = 0;
     int entry_point = 0;
@@ -67,4 +69,4 @@ void rmIsolatedNodes(struct graph* graph){
     //limit colors to number of nodes
     graph->max = maxValance;
 }
-
+**/

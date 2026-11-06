@@ -7,15 +7,13 @@ struct graph{
     int e;
     int m;
     int s;
-    int* names;
-    struct nb_list** nb_table;
-    struct nb_list* edges;
+    int* val;
+    struct edge** nb_table;
 };
 
-struct nb_list{
-    int length;
-    int* nb;
-    struct nb_list* tail;
+struct edge{
+    int to;
+    int from;
 };
 
 struct graph* initGraph(int v, int e, int m);
