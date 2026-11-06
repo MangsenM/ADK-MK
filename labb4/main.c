@@ -20,7 +20,6 @@ struct graph* readColorInstance() {
 void color2cast(struct graph* graph){
     int max = maxVal(graph);
     int connected = nrConnectedNodes(graph);
-    int s = THEEVERYTHINGFIX(graph);
 
     //to do spex case m = 1 and more colors than nodes
     if ((graph->m == 1 && graph->e == 0) || graph->m > max){
@@ -33,7 +32,7 @@ void color2cast(struct graph* graph){
     }
     
     //n, s, k values.
-    printf("%d\n%d\n%d\n", connected+2, s+2, graph->m+2);
+    printf("%d\n%d\n%d\n", connected+2, graph->e+2, graph->m+2);
     
     //divas
     printf("1 1\n");
@@ -57,18 +56,11 @@ void color2cast(struct graph* graph){
     renameConnected(graph, names);
 
     for (int i = 0; i < graph->v; i++){
-        
-        if(graph->belonging_edges[i] != 0){
-            printf("%d %d", graph->belonging_edges[i]+1, names[i]);
-            for(int j = i+1 ; j < graph->v ; j++){
-                if(graph->nb_mrx[i][j] != 0){
-                    printf(" %d",names[j]);
-                }
+        for(int j = i+1 ; j < graph->v ; j++){
+            if(graph->nb_mrx[i][j] != 0){
+                printf("2 %d %d\n",names[i], names[j]);
             }
-        
-            printf("\n");
         }
-
     }
 
     //divas scenes

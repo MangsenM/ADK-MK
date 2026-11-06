@@ -6,7 +6,6 @@ struct graph{
     int e;
     int m;
     int* val;
-    int* belonging_edges;
     int** nb_mrx;
 };
 
@@ -16,7 +15,6 @@ int maxVal(struct graph* graph);
 int nrConnectedNodes(struct graph* graph);
 void renameConnected(struct graph* graph, int* names);
 void destroyGraph(struct graph* graph);
-int THEEVERYTHINGFIX(struct graph* graph);
 
 #endif
 

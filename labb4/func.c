@@ -12,13 +12,12 @@ struct graph* initGraph(int v, int e, int m){
     struct graph* graph = malloc(sizeof(struct graph));
     int** nb_mrx = calloc(v, sizeof(int*));
     int* val = calloc(v, sizeof(int));
-    int* belonging_edges = calloc(v, sizeof(int));
 
     for (int i = 0 ; i < v ; i++){
         nb_mrx[i] = calloc(v,sizeof(int));
     }
 
-    *graph = (struct graph) {v, e, m, val, belonging_edges, nb_mrx};
+    *graph = (struct graph) {v, e, m, val, nb_mrx};
 
     return graph;
 };
@@ -28,14 +27,12 @@ void addEdge(struct graph* graph, int from, int to){
         if (graph->nb_mrx[from - 1][to - 1] == 0) {
             graph->val[from - 1]++;
             graph->val[to - 1]++;
-            graph->belonging_edges[from - 1]++;
         }
         graph->nb_mrx[from - 1][to - 1] = 1;
     } else {
         if (graph->nb_mrx[to - 1][from - 1] == 0) {
             graph->val[from - 1]++;
             graph->val[to - 1]++;
-            graph->belonging_edges[to - 1]++;
         }
         graph->nb_mrx[to - 1][from - 1] = 1;
     }
@@ -74,18 +71,6 @@ void renameConnected(struct graph* graph, int* names){
         }
     }
 }
-
-int THEEVERYTHINGFIX(struct graph* graph){
-    int c = 0;
-
-    for (int i = 0 ; i < graph->v ; i++){
-        if (graph->belonging_edges[i] > 0){
-            c++;
-        }
-    }
-
-    return c;
-};
 
 void destroyGraph(struct graph* graph){
     for(int i = 0; i < graph->v; i++){
