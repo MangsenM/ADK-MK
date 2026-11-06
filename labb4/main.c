@@ -11,22 +11,19 @@ struct graph* readColorInstance() {
     for (int i = 0; i < e; i++){
         int from, to;
         scanf("%d%d", &from, &to);
-        graph->nb_table[to - 1][from - 1] = (struct edge){to, from};
-        graph->val[from - 1]++;
+        addEdge(graph, from, to);
     }
-    
-    for (int i = 0; i < v; i ++){
-        graph->max = graph->max < graph->val[i] ? graph->val[i] : graph->max;
-    }
-
-    //rmIsolatedNodes(graph);
 
     return graph;
 }
 
 void color2cast(struct graph* graph){
-    //to do spex case m = 1
-    if (graph->m == 1 && graph->e == 0 || graph->m > graph->max){
+    int max = maxVal(graph);
+    int connected = nrConnectedNodes(graph);
+    int s = THEEVERYTHINGFIX(graph);
+
+    //to do spex case m = 1 and more colors than nodes
+    if ((graph->m == 1 && graph->e == 0) || graph->m > max){
         printf ("3\n2\n3\n1 1\n1 2\n1 3\n2 1 3\n2 2 3\n");
         return;
 
@@ -34,17 +31,16 @@ void color2cast(struct graph* graph){
         printf ("1\n1\n2\n2 1 2\n1 1\n");
         return;
     }
-
     
     //n, s, k values.
-    printf("%d\n%d\n%d\n", graph->v + 3, graph->s+2, graph->m + 3);
+    printf("%d\n%d\n%d\n", connected+2, s+2, graph->m+2);
     
     //divas
     printf("1 1\n");
     printf("1 2\n");
 
     //role restrictions
-    for(int i = 0; i < graph->v; i++){
+    for(int i = 0; i < connected; i++){
 
         printf("%d", graph->m);
 
@@ -54,39 +50,32 @@ void color2cast(struct graph* graph){
 
         printf("\n");
     }
-    
-    //bonus nodes
-    printf("1 %d\n", graph->m + 3);
 
     //scenes
 
+    int names[graph->v];
+    renameConnected(graph, names);
+
     for (int i = 0; i < graph->v; i++){
         
-        if (graph->nb_table[i] != NULL){
-            printf("%d %d", graph->val[i], i + 2);
-        for (int j = 0; i < graph->e; i++){
-            if (graph->nb_table[i][j].to != 0){
-                printf(" %d",graph->nb_table[i][j].to);
+        if(graph->belonging_edges[i] != 0){
+            printf("%d %d", graph->belonging_edges[i]+1, names[i]);
+            for(int j = i+1 ; j < graph->v ; j++){
+                if(graph->nb_mrx[i][j] != 0){
+                    printf(" %d",names[j]);
+                }
             }
-        }
+        
             printf("\n");
         }
 
     }
 
     //divas scenes
-    printf("2 %d 1\n", graph->v + 3);
-    printf("2 %d 2\n", graph->v + 3);
+    printf("2 1 3\n");
+    printf("2 2 3\n");
 
     fflush(stdout);
-}
-
-void destroyGraph(struct graph* graph){
-    for(int i = 0; i < graph->v; i++){
-    free(graph->nb_table[i]);
-    }
-    free(graph->val);
-    free(graph);
 }
 
 int main(void){

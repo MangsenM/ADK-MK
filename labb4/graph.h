@@ -3,24 +3,20 @@
 
 struct graph{
     int v;
-    int max;
     int e;
     int m;
-    int s;
     int* val;
-    struct edge** nb_table;
-};
-
-struct edge{
-    int to;
-    int from;
+    int* belonging_edges;
+    int** nb_mrx;
 };
 
 struct graph* initGraph(int v, int e, int m);
-void initEdge(struct graph* graph, struct nb_list* edge, int from, int to);
-void rmIsolatedNodes(struct graph* graph);
-void rmDupEdges(struct graph* graph);
-struct nb_list* getDummy();
+void addEdge(struct graph* graph, int from, int to);
+int maxVal(struct graph* graph);
+int nrConnectedNodes(struct graph* graph);
+void renameConnected(struct graph* graph, int* names);
+void destroyGraph(struct graph* graph);
+int THEEVERYTHINGFIX(struct graph* graph);
 
 #endif
 

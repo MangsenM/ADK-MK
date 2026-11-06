@@ -10,63 +10,88 @@ struct nb_list* getDummy(){
 **/
 struct graph* initGraph(int v, int e, int m){
     struct graph* graph = malloc(sizeof(struct graph));
-    struct edge** nb_table = calloc(v, sizeof(struct edge*));
-    int* val = calloc(v, sizeof(struct edge*));
+    int** nb_mrx = calloc(v, sizeof(int*));
+    int* val = calloc(v, sizeof(int));
+    int* belonging_edges = calloc(v, sizeof(int));
 
     for (int i = 0 ; i < v ; i++){
-        nb_table[i] = calloc(e,sizeof(struct edge));
+        nb_mrx[i] = calloc(v,sizeof(int));
     }
 
-    *graph = (struct graph) {v, 0, e, m, 0, val, nb_table};
+    *graph = (struct graph) {v, e, m, val, belonging_edges, nb_mrx};
 
     return graph;
 };
 
-/**
-void initEdge(struct graph* graph, struct nb_list* edge, int from, int to){
-    struct nb_list** nb_from = (graph->nb_table)+from-1; // -1 as edges 1 indexed
-    struct nb_list** nb_to = (graph->nb_table)+to-1;
-
-    //special handling for first edge from node
-    if ((*nb_from) == NULL || (*nb_from) == &dummy){
-        *edge = (struct nb_list) {1, graph->names+to-1, NULL};
-        (graph->nb_table)[from - 1] = edge;
+void addEdge(struct graph* graph, int from, int to){
+    if(from < to){
+        if (graph->nb_mrx[from - 1][to - 1] == 0) {
+            graph->val[from - 1]++;
+            graph->val[to - 1]++;
+            graph->belonging_edges[from - 1]++;
+        }
+        graph->nb_mrx[from - 1][to - 1] = 1;
     } else {
-        *edge = (struct nb_list) {graph->nb_table[from - 1]->length + 1, graph->names+to-1, graph->nb_table[from -1]};
-        (graph->nb_table)[from - 1] = edge;
-    }
-
-    if((*nb_to) == NULL){
-        (graph->nb_table)[to - 1] = &dummy;
+        if (graph->nb_mrx[to - 1][from - 1] == 0) {
+            graph->val[from - 1]++;
+            graph->val[to - 1]++;
+            graph->belonging_edges[to - 1]++;
+        }
+        graph->nb_mrx[to - 1][from - 1] = 1;
     }
 };
-**/
 
-/**
-void rmIsolatedNodes(struct graph* graph){
-    int nr_removed = 0;
-    int entry_point = 0;
-    int v_updated = graph->v;
-    int maxValance = 0;
+int maxVal(struct graph* graph){
+    int max = 0;
 
-    for(int i = 0 ; i < graph->v ; i++){
-        if(graph->nb_table[i] == NULL){
-            nr_removed++;
-            v_updated--;
-            graph->names[i] = 0;
-        } else {
-            maxValance = maxValance < graph->nb_table[i]->length ? graph->nb_table[i]->length : maxValance;
-            graph->names[i] = graph->names[i]-nr_removed;
-            if(graph->nb_table[i] != &dummy){
-                entry_point++;
-            }
+    for (int i = 0; i < graph->v; i ++){
+        max = max < graph->val[i] ? graph->val[i] : max;
+    }
+
+    return max;
+}
+
+int nrConnectedNodes(struct graph* graph){
+    int c = 0;
+
+    for (int i = 0 ; i < graph->v ; i++){
+        if (graph->val[i] > 0){
+            c++;
         }
     }
 
-    graph->v = v_updated;
-    graph->s = entry_point;
+    return c;
+};
 
-    //limit colors to number of nodes
-    graph->max = maxValance;
+void renameConnected(struct graph* graph, int* names){
+    int ctr = 3; //divas are 1 and 2
+    
+    for(int i = 0 ; i < graph->v ; i++) {
+        if (graph->val[i] != 0){
+            names[i] = ctr++;
+        } else {
+            names[i] = 0;
+        }
+    }
 }
-**/
+
+int THEEVERYTHINGFIX(struct graph* graph){
+    int c = 0;
+
+    for (int i = 0 ; i < graph->v ; i++){
+        if (graph->belonging_edges[i] > 0){
+            c++;
+        }
+    }
+
+    return c;
+};
+
+void destroyGraph(struct graph* graph){
+    for(int i = 0; i < graph->v; i++){
+        free(graph->nb_mrx[i]);
+    }
+    free(graph->nb_mrx);
+    free(graph->val);
+    free(graph);
+}
