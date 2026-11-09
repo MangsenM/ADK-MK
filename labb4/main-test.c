@@ -44,13 +44,11 @@ int* readColorInstance(struct graph* graph) {
         int from, to;
         scanf("%d%d", &from, &to);
 
-        printf("test");
         if(temp_visited[from-1][to-1] == 0 || temp_visited[to-1][from-1] == 0){
             graph->edges[i] = from;
             graph->edges[i+1] = to;
 
             degrees[from-1]++;
-            printf("a %d\n", degrees[from-1]);
             degrees[to-1]++;
             
             temp_visited[from-1][to-1] = 1;
@@ -71,13 +69,11 @@ void nameNodes(struct graph* graph, int* names){
 
     for(int i = 0 ; i < graph->v ; i++){
         if(names[i] != 0){
-            printf("! %d\n", names[i]);
             names[i] = name;
             name++;
         }
     }
 
-    printf("%d\n", name-3);
     graph->v = name-3; // number of roles
 }
 
@@ -117,7 +113,7 @@ void color2cast(struct graph* graph, int* names){
     //scenes
 
     for (int i = 0; i < graph->e*2-1 ; i+=2){
-        printf("2 %d %d\n", names[graph->edges[i]], names[graph->edges[i+1]]);
+        printf("2 %d %d\n", names[graph->edges[i]-1], names[graph->edges[i+1]-1]);
     }
 
     //divas scenes
