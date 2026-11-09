@@ -40,12 +40,12 @@ int* readColorInstance(struct graph* graph) {
     }
 
     int i = 0;
-    for (int j = 1; j < e; j++){
+    for (int j = 1; j <= e; j++){
         int from, to;
         scanf("%d%d", &from, &to);
 
         printf("test");
-        if(temp_visited[from-1][to-1] != 0 || temp_visited[to-1][from-1] != 0){
+        if(temp_visited[from-1][to-1] == 0 || temp_visited[to-1][from-1] == 0){
             graph->edges[i] = from;
             graph->edges[i+1] = to;
 
