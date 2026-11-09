@@ -27,7 +27,7 @@ void color2cast(struct graph* graph){
         return;
 
     } else if (graph->m == 1 && graph->e > 0){
-        printf ("1\n1\n2\n2 1 2\n1 1\n");
+        printf ("2\n1\n2\n2 1 2 \n2 1 2 \n2 1 2\n");
         return;
     }
     
